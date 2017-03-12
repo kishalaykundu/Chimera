@@ -1,0 +1,68 @@
+# Linux-specific libraries
+
+# Common paths and libraries used through the project
+find_library (MATH_LIB m REQUIRED)
+message (STATUS "")
+message (STATUS "Found Math library: " ${MATH_LIB})
+	
+find_library (DL_LIB dl REQUIRED)
+message (STATUS "")
+message (STATUS "Found Dynamic Loader library: " ${DL_LIB})
+	
+find_library (THREAD_LIB pthread REQUIRED)
+message (STATUS "")
+message (STATUS "Found Thread library: " ${THREAD_LIB})
+
+if (NOT GPU_PACKAGE OR GPU_PACKAGE STREQUAL "OpenGL")
+	find_library (GL_LIB GL PATHS ${GPU_PACKAGE_LOCATION} NO_DEFAULT_PATH)
+	find_library (GL_LIB GL REQUIRED)
+	message (STATUS "")
+	message (STATUS "Found OpenGL library: " ${GL_LIB})
+
+	if (UNIX)
+		find_library (GLX_LIB GLX PATHS ${GPU_PACKAGE_LOCATION} NO_DEFAULT_PATH)
+		find_library (GLX_LIB GLX REQUIRED)
+		message (STATUS "")
+		message (STATUS "Found GLX library: " ${GLX_LIB})
+		
+		find_library (X11_LIB X11 REQUIRED)
+		message (STATUS "")
+		message (STATUS "Found X11 library: " ${X11_LIB})
+	endif ()
+
+endif ()
+
+if (COMPUTE_PACKAGE STREQUAL "CUDA")
+	
+	if (COMPUTE_PACKAGE_LOCATION)
+		set (CUDA_TOOLKIT_ROOT_DIR ${COMPUTE_PACKAGE_LOCATION})
+	else ()
+		set (CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda")
+	endif ()
+	
+	find_package (CUDA REQUIRED)
+	message (STATUS "")
+	message (STATUS "Found CUDA package")
+	set (${CUDA_NVCC_FLAGS} "-O3 -gencode -Wall")
+
+elseif (COMPUTE_PACKAGE STREQUAL "OpenCL")
+
+	find_package (OpenCL REQUIRED)
+	message (STATUS "")
+	message (STATUS "Found OpenCL package")
+
+endif ()
+
+if (SCHEDULER_PACKAGE STREQUAL "IntelTBB")
+	if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+		find_library (TBB_LIB tbb_debug PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
+		find_library (TBBMALLOC_LIB tbbmalloc_debug PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
+	else ()
+		find_library (TBB_LIB tbb PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
+		find_library (TBBMALLOC_LIB tbbmalloc PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
+	endif ()
+	
+	set (TBB_LIBS ${TBB_LIB} ${TBBMALLOC_LIB})
+	message (STATUS "")
+	message (STATUS "Found Thread Building Blocks: " ${TBB_LIBS})
+endif ()

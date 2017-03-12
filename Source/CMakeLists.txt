@@ -1,0 +1,105 @@
+# Top-level CMAKE file responsible for folders in Source directory
+
+################## Set CXX Compile and Linker Flags ###################
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -march=native -Wall -Wextra -Wno-unused-parameter")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -fno-inline")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} -O3")
+elseif (CMAKE_BUILD_TYPE STREQUAL "ReleaseWithLog")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3")
+else ()
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+endif ()
+
+################## Optionally enabled logging output ##################
+
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+	option (SIM_LOG_ENABLED "Log Enabled" ON)
+endif ()
+
+############## Set default vector size to be used by GPU ##############
+
+if (NOT VECTOR3_ENABLED OR VECTOR3_ENABLED STREQUAL "OFF")
+	option (SIM_VECTOR4_ENABLED "Vector4" ON)
+else ()
+	option (SIM_VECTOR3_ENABLED "Vector3" ON)
+endif ()
+
+################# Optionally set double precision flag ################
+
+if (DOUBLE_PRECISION STREQUAL "ON")
+	option (SIM_DOUBLE_PRECISION "Double Precision" ON)
+endif ()
+
+############# Set Graphics package to be used by compiler #############
+
+if (NOT GPU_PACKAGE OR GPU_PACKAGE STREQUAL "OpenGL")
+	option (SIM_GL_ENABLED "OpenGL" ON)
+elseif (GPU_PACKAGE STREQUAL "Vulkan")
+	option (SIM_VK_ENABLED "Vulkan" ON)
+elseif (GPU_PACKAGE STREQUAL "DirectX")
+	option (SIM_DX_ENABLED "DirectX" ON)
+endif ()
+
+############# Set Compute package to be used by compiler ##############
+
+if (COMPUTE_PACKAGE STREQUAL "OpenCL")
+	option (SIM_CL_ENABLED "OpenCL" ON)
+elseif (COMPUTE_PACKAGE STREQUAL "CUDA")
+	option (SIM_CUDA_ENABLED "CUDA" ON)
+elseif (COMPUTE_PACKAGE STREQUAL "DirectCompute")
+	option (SIM_DIRECTCOMPUTE_ENABLED "DirectCompute" ON)
+endif ()
+
+############ Set Scheduler package to be used by compiler #############
+
+if (SCHEDULER_PACKAGE STREQUAL "IntelTBB")
+	option (SIM_TBB_ENABLED "IntelTBB" ON)
+elseif (SCHEDULER_PACKAGE STREQUAL "Threads")
+	option (SIM_THREADS_ENABLED "Threads" ON)
+endif ()
+
+###################### Set pre-defined variables ######################
+
+if (NOT MAX_EVENT_QUEUE_SIZE)
+	set (SIM_MAX_EVENT_QUEUE_SIZE 32)
+else ()
+	set (SIM_MAX_EVENT_QUEUE_SIZE ${MAX_EVENT_QUEUE_SIZE})
+endif ()
+
+if (NOT MAX_GPU_DIRECTIONAL_LIGHTS)
+	set (SIM_MAX_GPU_DIRECTIONAL_LIGHTS 2)
+else ()
+	set (SIM_MAX_GPU_DIRECTIONAL_LIGHTS ${MAX_GPU_DIRECTIONAL_LIGHTS})
+endif ()
+
+################# Find Platform-independent libraries #################
+
+find_library (XML_LIB tinyxml2 PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
+message (STATUS "")
+message (STATUS "Found XML library: " ${XML_LIB})
+
+################## Add Platform Specific Cmake files ##################
+
+if (APPLE) # MAC OS X
+	include (${SIM_SOURCE_DIR}/CMakeLists.MacOSX.txt)
+elseif (UNIX) # Linux
+	include (${SIM_SOURCE_DIR}/CMakeLists.Linux.txt)
+elseif (WIN32) #Windows
+	include (${SIM_SOURCE_DIR}/CMakeLists.Win32.txt)
+endif ()
+
+#################### Add source code directories #####################
+
+add_subdirectory (TestKitchen)
+add_subdirectory (ToolBox)
+add_subdirectory (Drivers)
+add_subdirectory (Plugins)
+
+######### Set up Config.h.in to define variables in Config.h #########
+
+# IMPORTANT: This line should be the last line after all option flags are set
+configure_file (${SIM_SOURCE_DIR}/Common/Config.h.in ${SIM_SOURCE_DIR}/Common/Config.h)
