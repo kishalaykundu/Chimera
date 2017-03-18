@@ -13,6 +13,6 @@
 
 #include "Config.h"
 
-#if defined (SIM_GL_ENABLED) && defined (SIM_CUDA_ENABLED) && defined (SIM_TBB_ENABLED)
+#if defined (SIM_GL_ENABLED) && defined (SIM_CUDA_ENABLED) && defined (SIM_TBB_SCHEDULER_ENABLED)
 #	include "GL-CUDA-TBB/Driver.h"
 #endif

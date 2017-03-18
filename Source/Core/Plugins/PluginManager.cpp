@@ -91,7 +91,7 @@ namespace Sim {
 	void PluginManager::Cleanup ()
 	{
 		_plugins.clear ();
-		_libManager.clear ();
+		_libManager.reset ();
 		_nameMap.clear ();
 	}
 

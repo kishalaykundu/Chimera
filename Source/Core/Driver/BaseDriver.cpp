@@ -13,6 +13,9 @@
 #include "Config.h"
 #include "Preprocess.h"
 
+#include "Display/DisplayManager.h"
+#include "HPC/HPCManager.h"
+#include "Tasks/TaskManager.h"
 #include "Plugins/PluginManager.h"
 #include "Assets/AssetFactory.h"
 #include "Events/EventManager.h"
@@ -40,6 +43,13 @@ namespace Sim {
 		_runFlag = d._runFlag;
 		_quitFlag = d._quitFlag;
 		return *this;
+	}
+
+	// prepare for quitting
+	void BaseDriver::Quit ()
+	{
+		_runFlag = false;
+		_quitFlag = true;
 	}
 
 	bool BaseDriver::InitializePluginManager (const char* config)

@@ -3,24 +3,28 @@ project (APP CXX)
 
 # Set include directory paths
 include_directories (
-	${SIM_SOURCE_DIR}/Core
-	${SIM_SOURCE_DIR}/Drivers
-	${SIM_SOURCE_DIR}/Common
+	${GPU_INCLUDE_PATH}
+	${COMPUTE_INCLUDE_PATH}
+	${SCHEDULER_INCLUDE_PATH}
 	${SIM_SOURCE_DIR}/Packages/FastCallback
 	${SIM_SOURCE_DIR}/Packages/TBB/include
-	${SIM_SOURCE_DIR}/Packages/TinyXML)
+	${SIM_SOURCE_DIR}/Packages/TinyXML
+	${SIM_SOURCE_DIR}/Common
+	${SIM_SOURCE_DIR}/Core
+	${SIM_SOURCE_DIR}/Drivers)
 
 # Set essential library links
-set (APP_REQUIRED_LIBS ${APP_REQUIRED_LIBS}
-	${DL_LIB} ${MATH_LIB} ${THREAD_LIB} ${XML_LIB}
-	${GL_LIB} ${GLX_LIB} ${X11_LIB} ${CUDA_LIB} ${TBB_LIBS})
+set (APP_REQUIRED_LIBS ${APP_REQUIRED_LIBS} ${DL_LIB} ${MATH_LIB}
+		${THREAD_LIB} ${XML_LIB} ${OPENGL_LIBS} ${CUDA_LIBS} ${TBB_LIBS})
 	
 # Set Core directory path
 set (SIM_CORE_DIR ${SIM_SOURCE_DIR}/Core)
 
 # Add source files from other folders
 set (APP_SRCS ${APP_SRCS}
-	${SIM_SOURCE_DIR}/Include/InputParser.cpp)
+	${SIM_SOURCE_DIR}/Common/Vector.cpp
+	${SIM_SOURCE_DIR}/Common/InputParser.cpp
+	${SIM_SOURCE_DIR}/Core/Assets/Geometry.cpp)
 
 # Add core source files
 file (GLOB ASSETS_DIR_SRCS "${SIM_CORE_DIR}/Assets/*.cpp")
@@ -44,7 +48,7 @@ set (APP_SRCS ${APP_SRCS}
 file (GLOB GL45_DIR_SRCS "${SIM_CORE_DIR}/Display/GL45/*.cpp")
 file (GLOB CUDA_DIR_SRCS "${SIM_CORE_DIR}/HPC/CUDA/*.cpp")
 file (GLOB TBB_DIR_SRCS "${SIM_CORE_DIR}/Tasks/TBB/*.cpp")
-file (GLOB DRIVER_DIR_SRCS "GL-CUDA-TBB/*.cpp")
+file (GLOB DRIVER_DIR_SRCS "${SIM_SOURCE_DIR}/Drivers/GL-CUDA-TBB/*.cpp")
 
 set (APP_SRCS ${APP_SRCS} ${GL45_DIR_SRCS} ${CUDA_DIR_SRCS} ${TBB_DIR_SRCS} ${DRIVER_DIR_SRCS})
 

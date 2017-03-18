@@ -2,7 +2,7 @@
 project (QUERYGL CXX)
 
 # Set include directories
-include_directories (${SIM_SOURCE_DIR}/Common)
+include_directories (${GPU_INCLUDE_PATH} ${SIM_SOURCE_DIR}/Common)
 
 # Set required libraries - OpenGL related
 set (QGL_REQUIRED_LIBS ${QGL_REQUIRED_LIBS} ${GLX_LIB} ${X11_LIB} ${GL_LIB})

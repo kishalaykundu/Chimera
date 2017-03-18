@@ -2,22 +2,26 @@
 project (CUGL CXX)
 
 # Set include directories
-include_directories (./ ${SIM_SOURCE_DIR}/Common)
-
-# Set required libraries - OpenGL related
-set (CUGL_REQUIRED_LIBS ${CUGL_REQUIRED_LIBS} ${GLX_LIB} ${X11_LIB} ${GL_LIB})
+include_directories (${GPU_INCLUDE_PATH}
+	${COMPUTE_INCLUDE_PATH}
+	${SIM_SOURCE_DIR}/Packages/FastCallback
+	./
+	${SIM_SOURCE_DIR}/Common)
 
 # Set required libraries - thread related
 set (CUGL_REQUIRED_LIBS ${CUGL_REQUIRED_LIBS} ${THREAD_LIB})
 
+# Set required libraries - OpenGL related
+set (CUGL_REQUIRED_LIBS ${CUGL_REQUIRED_LIBS} ${OPENGL_LIBS})
+
 # Set required libraries - CUDA related
-set (CUGL_REQUIRED_LIBS ${CUGL_REQUIRED_LIBS} ${CUDA_PACKAGE})
+set (CUGL_REQUIRED_LIBS ${CUGL_REQUIRED_LIBS} ${CUDA_LIBS})
 
 # Set source files
 set (CUGL_SRCS
 	./Mesh.cpp
 	./GLDisplay.cpp
-	./CuPhyiscs.cpp
+	./CuPhysics.cpp
 	./main.cpp)
 
 # Set and link target

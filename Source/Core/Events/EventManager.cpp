@@ -49,7 +49,7 @@ namespace Sim {
 
 	bool EventManager::QueueEvent (Event& e)
 	{
-		_queue [_index].Push(e);
+		_queue.Push(e);
 		return true;
 	}
 

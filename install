@@ -11,14 +11,17 @@ function echo_help {
 	echo $'\t'"--verbose (makefile verbose output)"
 	echo $'\t'"--double-precision (turns on double precision)"
 	echo $'\t'"--with-vec3 (use 3-element vector instead of 4)"
-	echo $'\t'"--gpu-package=<GPU_PACKAGE> [OpenGL(default)/Vulkan/DirectX]"
+	echo $'\t'"--gpu-package=<GPU-PACKAGE> [OpenGL(default)/Vulkan/DirectX]"
+	echo $'\t'"--gpu-include-path=<INCLUDE-PATH> (specifies non-standard GPU include path"
 	echo $'\t'"--gpu-package-location=<LOCATION> (specifies non-standard GPU library location)"
-	echo $'\t'"--compute-package=<COMPUTE_PACKAGE> [None(default)/CUDA/OpenCL/DirectCompute]"
+	echo $'\t'"--compute-package=<COMPUTE-PACKAGE> [None(default)/CUDA/OpenCL/DirectCompute]"
+	echo $'\t'"--compute-include-path=<INCLUDE-PATH> (specifies non-standard Compute include path"
 	echo $'\t'"--compute-package-location=<LOCATION> (specifies non-standard Compute library location)"
-	echo $'\t'"--scheduler-package=<SCHEDULAR_PACKAGE> [None(default)/IntelTBB/Threads]"
+	echo $'\t'"--scheduler-package=<SCHEDULAR-PACKAGE> [None(default)/IntelTBB/Threads]"
+	echo $'\t'"--scheduler-include-path=<INCLUDE-PATH> (specifies non-standard scheduler include path"
 	echo $'\t'"--scheduler-package-location=<LOCATION> (specifies non-standard scheduler library location)"
-	echo $'\t'"--max-event-queue-size=<MAX_QUEUE_SIZE> [default: 32 (recommended power of 2)]"
-	echo $'\t'"--max-gpu-directional-lights=<MAX_DIRECTIONAL_LIGHTS> [default: 2 (recommended power of 2)]"
+	echo $'\t'"--max-event-queue-size=<MAX-QUEUE-SIZE> [default: 32 (recommended power of 2)]"
+	echo $'\t'"--max-gpu-directional-lights=<MAX-DIRECTIONAL-LIGHTS> [default: 2 (recommended power of 2)]"
 	echo ""
 	echo "Minimum System specifications (Check your system for successful compilation):";
 	echo "OpenGL"$'\t'": 4.5"
@@ -122,6 +125,11 @@ do
 		shift
 		;;
 		
+		--gpu-include-path=*)
+		gpu_include="${i#*=}"
+		shift
+		;;
+		
 		--gpu-package-location=*)
 		gpu_pkg_loc="${i#*=}"
 		shift
@@ -132,6 +140,11 @@ do
 		shift
 		;;
 		
+		--compute-include-path=*)
+		compute_include="${i#*=}"
+		shift
+		;;
+		
 		--compute-package-location=*)
 		compute_pkg_loc="${i#*=}"
 		shift
@@ -139,6 +152,11 @@ do
 		
 		--scheduler-package=*)
 		scheduler_package="${i#*=}"
+		shift
+		;;
+		
+		--scheduler-include-path=*)
+		scheduler_include="${i#*=}"
 		shift
 		;;
 		
@@ -222,6 +240,11 @@ then
 fi
 cmake_flags+=" -DGPU_PACKAGE=$gpu_package"
 
+if [ "$gpu_include" != "" ];
+then
+	cmake_flags+=" -DGPU_INCLUDE_PATH=$gpu_include"
+fi
+
 if [ "$gpu_pkg_loc" != "" ];
 then
 	cmake_flags+=" -DGPU_PACKAGE_LOCATION=$gpu_pkg_loc"
@@ -232,6 +255,11 @@ then
 	cmake_flags+=" -DCOMPUTE_PACKAGE=$compute_package"
 fi
 
+if [ "$compute_include" != "" ];
+then
+	cmake_flags+=" -DCOMPUTE_INCLUDE_PATH=$compute_include"
+fi
+
 if [ "$compute_package_location" != "" ];
 then
 	cmake_flags+=" -DCOMPUTE_PACKAGE_LOCATION=$compute_pkg_loc"
@@ -240,6 +268,11 @@ fi
 if [ "$scheduler_package" != "" ];
 then
 	cmake_flags+=" -DSCHEDULER_PACKAGE=$scheduler_package"
+fi
+
+if [ "$scheduler_include" != "" ];
+then
+	cmake_flags+=" -DSCHEDULER_INCLUDE_PATH=$scheduler_include"
 fi
 
 if [ "$scheduler_package_location" != "" ];

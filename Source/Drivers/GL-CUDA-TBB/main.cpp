@@ -17,6 +17,8 @@
 #include "Preprocess.h"
 #include "GL-CUDA-TBB/Driver.h"
 
+using Sim::Driver;
+
 int main (int argc, const char** argv)
 {
 	// sanity check
@@ -46,7 +48,7 @@ int main (int argc, const char** argv)
 		Driver::Instance ().Run ();
 
 		// PREPARE FOR EXITING: CLEAN ALL APP RESOURCES
-		Driver::Instance ().Quit ();
+		Driver::Instance ().Cleanup ();
 
 	exit (EXIT_SUCCESS);
 }

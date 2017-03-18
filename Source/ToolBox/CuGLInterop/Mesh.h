@@ -11,10 +11,9 @@
 
 #include <memory>
 #include <mutex>
+#include "Vector.h"
 
 namespace Sim {
-
-	class Vector;
 
 	class Mesh {
 
@@ -29,6 +28,8 @@ namespace Sim {
 		std::shared_ptr <unsigned int> _faces;
 
 	public:
+		Mesh ();
+		~Mesh ();
 		bool Initialize (const char* vertexFile, const char* indexFile);
 		void Cleanup ();
 	};

@@ -21,7 +21,7 @@ namespace Sim {
 	class MeshLoader {
 
 	public:
-		static bool LoadVertices (const char* file, unsigned int& numVerts, shared_ptr <Vector>& v1, shared_ptr <Vector>& v2)
+		static bool LoadVertices (const char* file, unsigned int& numVerts, shared_ptr <Vector>& v1)
 		{
 			FILE* fp = fopen (file, "r");
 			if (fp == nullptr){
@@ -42,12 +42,8 @@ namespace Sim {
 				LOG_ERROR ("Could not allocate 1st vertex array of size " << numVerts << " from " << file);
 				return false;
 			}
-			v2 = shared_ptr <Vector> (new Vector [numVerts], DeleteArray <Vector> ());
-			if (!v2){
-				LOG_ERROR ("Could not allocate 2nd vertex array of size " << numVerts << " from " << file);
-				return false;
-			}
 
+			Vector* vptr = v1.get ();
 			Real verts [SIM_VECTOR_SIZE];
 #			ifdef SIM_VECTOR4_ENABLED
 			verts [3] = 1.;
@@ -67,15 +63,10 @@ namespace Sim {
 				}
 #			endif
 				for (unsigned int j = 0; j < SIM_VECTOR_SIZE; ++j){
-					(v1.get () [i])[j] = verts [j];
+					(vptr [i])[j] = verts [j];
 				}
 			}
 			fclose (fp);
-
-			// copy first array to the next
-			for (unsigned int i = 0; i < numVerts; ++i){
-				v2.get () [i] = v1.get () [i];
-			}
 
 			return true;
 		}
@@ -101,6 +92,7 @@ namespace Sim {
 				fclose (fp);
 				return false;
 			}
+			unsigned int* iptr = indices.get ();
 
 			numIndices = static_cast <unsigned int> (nInds);
 			indices = shared_ptr <unsigned int> (new unsigned int [n*numIndices], DeleteArray <unsigned int> ());
@@ -120,7 +112,7 @@ namespace Sim {
 					}
 #					endif
 					for (unsigned int j = 0; j < 2; ++j){
-						indices [2*i + j] = static_cast <unsigned int> (inds [j]);
+						iptr [2*i + j] = static_cast <unsigned int> (inds [j]);
 					}
 				}
 				break;
@@ -135,7 +127,7 @@ namespace Sim {
 					}
 #					endif
 					for (unsigned int j = 0; j < 3; ++j){
-						indices [3*i + j] = static_cast <unsigned int> (inds [j]);
+						iptr [3*i + j] = static_cast <unsigned int> (inds [j]);
 					}
 				}
 				break;
@@ -151,7 +143,7 @@ namespace Sim {
 					}
 #					endif
 					for (unsigned int j = 0; j < 4; ++j){
-						indices [4*i + j] = static_cast <unsigned int> (inds [j]);
+						iptr [4*i + j] = static_cast <unsigned int> (inds [j]);
 					}
 				}
 				break;

@@ -23,6 +23,8 @@ namespace Sim {
 		_display (nullptr), _contextAttributes (nullptr)
 	{ }
 
+	GLDisplay::~GLDisplay () {}
+
 	// initialization method
 	bool GLDisplay::Initialize (shared_ptr <Sim::Mesh>& m)
 	{
@@ -51,19 +53,19 @@ namespace Sim {
 		delete [] _contextAttributes;
 	}
 
-	Display* GLDisplay::Display () const
+	Display* GLDisplay::GetDisplay () const
 	{
 		return _display;
 	}
-	GLXFBConfig& GLDisplay::Config () const
+	GLXFBConfig GLDisplay::GetConfig () const
 	{
 		return _config;
 	}
-	GLXContext& GLDisplay::Context () const
+	GLXContext GLDisplay::GetContext () const
 	{
 		return _context;
 	}
-	int* GLDisplay::ContextAttributes () const
+	int* GLDisplay::GetContextAttributes () const
 	{
 		return _contextAttributes;
 	}

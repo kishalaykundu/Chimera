@@ -113,7 +113,7 @@ namespace Sim {
 
 		bool Geometry::ReadVertexFile (const char* file)
 		{
-			if (!MeshLoader::LoadVertices (file, _numVertices, _current, _previous)){
+			if (!MeshLoader::LoadVertices (file, _numVertices, _current)){
 				LOG_ERROR ("Could not read vertex file " << file);
 				return false;
 			}

@@ -35,6 +35,7 @@ namespace Sim {
 			::GLXContext _context;
 			::Window _window;
 			::Display *_display;
+			::XWindowAttributes _attributes;
 			::XEvent _event;
 
 			std::unique_ptr <GLRenderer> _renderer;
@@ -59,6 +60,10 @@ namespace Sim {
 			unsigned int WindowWidth () const;
 			unsigned int WindowHeight () const;
 			unsigned int WindowColorDepth () const;
+
+			unsigned int AddProgram (const char* name, const char* location);
+			unsigned int GetProgramId (const char* name) const;
+			bool ReloadProgram (unsigned id);
 
 		protected:
 			void UpdateWindow ();

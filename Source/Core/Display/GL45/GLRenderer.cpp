@@ -17,7 +17,7 @@
 #include "Preprocess.h"
 #include "GL/GL.h"
 
-#include "Driver.h"
+#include "Display/GL45/GLDisplayManager.h"
 #include "Display/GL45/GLProgram.h"
 #include "Display/GL45/GLRenderer.h"
 
@@ -31,8 +31,8 @@ using tinyxml2::XMLError;
 namespace Sim {
 
 	GLRenderer::GLRenderer ()
-	: _hither (1.), _yon (1500.), _fov (45.),
-		_mouseX (0), _mouseY (0), _mouseButton (0)
+	: _owner (nullptr), _hither (1.), _yon (1500.), _fov (45.),
+		_mouseX (0), _mouseY (0), _mouseButton (0), _numLights (0)
 	{
 		// make background into black
 		for (unsigned int i = 0; i < 3; ++i){
@@ -81,7 +81,10 @@ namespace Sim {
 
 		relem = elem.FirstChildElement ("DirectionalLights");
 		if (relem != nullptr){
-			SetDirectionalLights (*relem);
+			if (!SetDirectionalLights (*relem)){
+				LOG_ERROR ("Could not initialize directional lights");
+				return false;
+			}
 		}
 
 		EnableGLAttribs ();
@@ -98,6 +101,49 @@ namespace Sim {
 
 	void GLRenderer::Cleanup ()
 	{
+	}
+
+	GLuint GLRenderer::AddProgram (const char* name, const char* location)
+	{
+		// check for existing program
+		auto search = _programs.find (name);
+		if (search != _programs.end ()){
+			return search->second->Id ();
+		}
+
+		// load a new program
+		_programs [name] = make_shared <GLProgram> (name, location);
+		if (!_programs [name]->Load ()){
+			LOG_ERROR ("Could not load GLSL program " << name << " at " << location);
+			return 0;
+		}
+		return _programs [name]-> Id ();
+	}
+
+	GLuint GLRenderer::GetProgramId (const char* name) const
+	{
+#		ifndef NDEBUG
+		for (const auto &nm : _programs){
+			if (!nm.first.compare (name)){
+				return nm.second->Id ();
+			}
+		}
+		LOG_ERROR ("No GLSL program with the name " << name << " found. Returning 0");
+		return 0;
+#		else
+		return _programs [name]->Id ();
+#		endif
+	}
+
+	bool GLRenderer::ReloadProgram (GLuint id)
+	{
+		for (const auto &p : _programs){
+			if (id == p.second->Id ()){
+				return p.second->Load ();
+			}
+		}
+		LOG_ERROR ("No program with id " << id << " found");
+		return false;
 	}
 
 	void GLRenderer::CheckGLVersion ()
@@ -161,28 +207,25 @@ namespace Sim {
 		}
 	}
 
-	void GLRenderer::SetDirectionalLights (XMLElement& elem)
+	bool GLRenderer::SetDirectionalLights (XMLElement& elem)
 	{
 		unsigned int count = 0;
 		elem.QueryUnsignedAttribute ("Count", &count);
 		if (!count){
-			return;
+			LOG_ERROR ("Directional light count not specified");
+			return false;
 		}
-#		ifndef NDEBUG
-		if (count > SIM_MAX_GPU_DIRECTIONAL_LIGHTS){
-			LOG_WARNING ("Count specified in " << elem.Value () << " is more than " << SIM_MAX_GPU_DIRECTIONAL_LIGHTS
-					 << " Only the first " << SIM_MAX_GPU_DIRECTIONAL_LIGHTS << " will be loaded.");
-			LOG_WARNING ("Please use -DMAX_GPU_DIRECTIONAL_LIGHTS flag in cmake to set new max for directional lights");
-		}
-#		endif
+		_numLights = count;
 
 		XMLElement* lelem = elem.FirstChildElement ("Light");
 		if (lelem == nullptr){
-			LOG_WARNING ("Directional Lights specified but no \'Light\' element retrieved");
-			return;
+			LOG_ERROR ("Directional Lights specified but no \'Light\' element retrieved");
+			return false;
 		}
+		_directionalLights = shared_ptr <DirectionalLight> (new DirectionalLight [count], DeleteArray <DirectionalLight> ());
+
 		unsigned int i = 0;
-		while (lelem != nullptr && i < count && i < SIM_MAX_GPU_DIRECTIONAL_LIGHTS){
+		while (lelem != nullptr && i < count){
 
 			DirectionalLight light;
 			XMLElement* celem = lelem->FirstChildElement ("Direction");
@@ -254,9 +297,14 @@ namespace Sim {
 #				endif
 			}
 
-			_directionalLights.push_back (light);
+			_directionalLights.get () [i] = light;
 			++i; lelem = lelem->NextSiblingElement ("Light");
 		}
+		if (i < count){
+			_numLights = i;
+			LOG_WARNING ("Directional Light \'Count\'" << count << " does not correspond with number of lights specified - " << i);
+		}
+		return true;
 	}
 
 	void GLRenderer::EnableGLAttribs ()
@@ -306,7 +354,7 @@ namespace Sim {
 		Real mag = static_cast <Real> (sqrt (deltaX*deltaX + deltaY*deltaY));
 		deltaX /= mag;
 		deltaY /= mag;
-		Real cosVal = static_cast <Real> (cos (180.* mag/ Engine::Instance ().WindowWidth ()));
+		Real cosVal = static_cast <Real> (cos (180.* mag/ _owner->WindowWidth ()));
 		Real sinVal = static_cast <Real> (sqrt (1. - cosVal*cosVal));
 
 		Real tr00 = deltaY * deltaY * (1. - cosVal) + cosVal;
@@ -405,7 +453,7 @@ namespace Sim {
 	{
 		Real top = _hither * static_cast <Real> (tan (M_PI * _fov/ 360.));
 		Real bottom = -top;
-		Real aspect = static_cast <Real> (Engine::Instance ().WindowWidth ())/ Engine::Instance ().WindowHeight ();
+		Real aspect = static_cast <Real> (_owner->WindowWidth ())/ _owner->WindowHeight ();
 		Real left = bottom * aspect;
 		Real right = top * aspect;
 

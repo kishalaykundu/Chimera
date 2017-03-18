@@ -16,6 +16,7 @@
 #include <memory>
 #include <thread>
 
+#include "Callback.h"
 #include "Mesh.h"
 #include "GLDisplay.h"
 #include "CuPhysics.h"
@@ -26,9 +27,16 @@ using std::thread;
 using std::shared_ptr;
 using std::make_shared;
 
+using util::Callback;
+
 using Sim::Mesh;
 using Sim::GLDisplay;
 using Sim::CuPhysics;
+
+void Invoke (Callback<void (void)> callback)
+{
+
+}
 
 int main (int argc, const char** argv)
 {
@@ -46,23 +54,23 @@ int main (int argc, const char** argv)
 	shared_ptr <GLDisplay> display = make_shared <GLDisplay> ();
 	if (!display->Initialize (mesh)){
 		cerr << "Could not load GL Display....Aborting" << endl;
-		mesh.clear ();
-		exit (EXIT_FAILURE)
+		mesh.reset ();
+		exit (EXIT_FAILURE);
 	}
 	shared_ptr <CuPhysics> physics= make_shared <CuPhysics> ();
 	if (!physics->Initialize (display)){
 		cerr << "Could not load CUDA physics....Aborting" << endl;
-		display.clear ();
-		mesh.clear ();
+		display.reset ();
+		mesh.reset ();
 		exit (EXIT_FAILURE);
 	}
 
-	thread t1 (display->Run);
-	thread t2 (physics->Run);
+	thread t1 (Invoke, BIND_MEM_CB (&GLDisplay::Run, display.get ()));
+	thread t2 (Invoke, BIND_MEM_CB (&CuPhysics::Run, physics.get ()));
 
 	physics->Cleanup ();
 	display->Cleanup ();
-	mesh.clear ();
+	mesh.reset ();
 
 	exit (EXIT_SUCCESS);
 }

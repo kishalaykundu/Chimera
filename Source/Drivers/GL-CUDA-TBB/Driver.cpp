@@ -14,7 +14,6 @@
 #include "Preprocess.h"
 #include "InputParser.h"
 #include "GL-CUDA-TBB/Driver.h"
-#include "Display/GL45/GLDisplayManager.h"
 #include "HPC/CUDA/CudaHPCManager.h"
 #include "Tasks/TBB/TBBTaskManager.h"
 
@@ -143,12 +142,12 @@ namespace Sim {
 
 	void Driver::Cleanup ()
 	{
-		_taskManager.clear ();
-		_assetFactory.clear ();
-		_pluginManager.clear ();
-		_hpcManager.clear ();
-		_displayManager.clear ();
-		_eventManager.clear ();
+		_taskManager.reset ();
+		_assetFactory.reset ();
+		_pluginManager.reset ();
+		_hpcManager.reset ();
+		_displayManager.reset ();
+		_eventManager.reset ();
 	}
 
 	// initialization method for GL display manager

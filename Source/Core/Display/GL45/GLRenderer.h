@@ -9,14 +9,14 @@
  */
 #pragma once
 
-#include <cstring>
+#include <string>
 #include <memory>
+#include <map>
 
 #include "tinyxml2.h"
 #include "Preprocess.h"
 #include "GL/GL.h"
 
-#include "Array.h"
 #include "AxisAlignedBox.h"
 
 namespace Sim {
@@ -57,12 +57,14 @@ namespace Sim {
 	} DirectionalLight;
 
 	class GLProgram;
+	class GLDisplayManager;
 
 	class GLRenderer {
 
-			friend class Engine;
+			friend class GLDisplayManager;
 
 		protected:
+			GLDisplayManager* _owner;
 			AxisAlignedBox _bounds;
 			GLreal _hither, _yon, _fov;
 			GLreal _background [3]; // background color
@@ -76,8 +78,10 @@ namespace Sim {
 			GLreal _cameraPosition [3];
 			GLreal _cameraScales [3];
 
-			Array <GLProgram*, SIM_MAX_GPU_PROGRAMS> _programs;
-			Array <DirectionalLight, SIM_MAX_GPU_DIRECTIONAL_LIGHTS> _directionalLights;
+			std::map <std::string, std::shared_ptr <GLProgram> > _programs;
+
+			unsigned int _numLights;
+			std::shared_ptr <DirectionalLight> _directionalLights;
 
 		public:
 			GLRenderer ();
@@ -87,11 +91,15 @@ namespace Sim {
 			void Update ();
 			void Cleanup ();
 
+			GLuint AddProgram (const char* name, const char* location);
+			GLuint GetProgramId (const char* name) const;
+			bool ReloadProgram (GLuint id);
+
 		private:
 			void CheckGLVersion ();
 			void SetWindowBackground (tinyxml2::XMLElement&);
 			void SetCameraPosition (tinyxml2::XMLElement&);
-			void SetDirectionalLights (tinyxml2::XMLElement&);
+			bool SetDirectionalLights (tinyxml2::XMLElement&);
 			void EnableGLAttribs ();
 
 		protected:

@@ -17,12 +17,13 @@
 #include <memory>
 
 #include "tinyxml2.h"
+#include "Preprocess.h"
 #include "Assets/AssetFactory.h"
 #include "Assets/Component.h"
 
 namespace Sim {
 
-	class Asset {
+	class EXPORT Asset {
 
 			friend class AssetFactory;
 
@@ -45,6 +46,11 @@ namespace Sim {
 
 			bool Initialize (tinyxml2::XMLElement&);
 			void Cleanup ();
+
+			void AddComponent (const char* name, std::shared_ptr <Assets::Component> component)
+			{
+				_components [AssetFactory::ComponentId (name)] = component;
+			}
 
 			template <class ComponentType> std::weak_ptr <ComponentType> GetComponent (const char* name)
 			{

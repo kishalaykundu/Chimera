@@ -16,6 +16,7 @@
 
 #include "Driver.h"
 
+#include "InputParser.h"
 #include "Assets/Asset.h"
 #include "Assets/AssetFactory.h"
 
@@ -67,7 +68,7 @@ namespace Sim {
 			Cleanup ();
 			return false;
 		}
-		if (!LoadComponents (elem)){
+		if (!LoadComponents (*element)){
 			LOG_ERROR ("Failed to load all asset components from " << configfile);
 			Cleanup ();
 			return false;
@@ -203,10 +204,11 @@ namespace Sim {
 				}
 				const char* config = clist->Attribute ("Config");
 
-				shared_ptr <Assets::Component> cp = Engine::Instance ().GetPlugin (plugin)->Initialize (type, config);
-				unsigned int cid = ComponentId (type);
-				a->second->_components [cid] = std::move (cp);
-				a->second->_components [cid]->SetOwner (a->second);
+				if (!Driver::Instance ().GetPlugin (plugin)->InitializeAssetComponent (type, config, a->second)){
+					LOG_ERROR ("Could not initialize " << type << " component from " << config);
+					return false;
+				}
+				a->second->_components [ComponentId (type)]->SetOwner (a->second);
 
 				clist = clist->NextSiblingElement ("Component");
 			}

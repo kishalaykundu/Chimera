@@ -14,9 +14,11 @@
 #include "Preprocess.h"
 
 #include "InputParser.h"
+#include "Driver.h"
 #include "Display/GL45/GLRenderer.h"
 #include "Display/GL45/GLDisplayManager.h"
 
+using std::make_unique;
 using tinyxml2::XMLElement;
 
 namespace Sim {
@@ -76,7 +78,7 @@ namespace Sim {
 
 	void GLDisplayManager::Cleanup ()
 	{
-		_renderer.clear ();
+		_renderer.reset ();
 
 		// last line to destroy display window
 		DestroyWindow ();
@@ -113,6 +115,84 @@ namespace Sim {
 	unsigned int GLDisplayManager::WindowWidth () const {return _width;}
 	unsigned int GLDisplayManager::WindowHeight () const {return _height;}
 	unsigned int GLDisplayManager::WindowColorDepth () const {return static_cast <unsigned int> (_colorDepth);}
+
+	GLuint GLDisplayManager::AddProgram (const char* name, const char* location)
+	{
+		return _renderer->AddProgram (name, location);
+	}
+	GLuint GLDisplayManager::GetProgramId (const char* name) const
+	{
+		return _renderer->GetProgramId (name);
+	}
+	bool GLDisplayManager::ReloadProgram (GLuint id)
+	{
+		return _renderer->ReloadProgram (id);
+	}
+
+	// handle X Window events
+	void GLDisplayManager::UpdateWindow ()
+	{
+	 	XNextEvent(_display, &_event);
+
+	 	switch (_event.type) {
+
+	 	case Expose:
+	 	{
+			XGetWindowAttributes(_display, _window, &_attributes);
+			if (_width != static_cast <unsigned int> (_attributes.width) ||
+					_height != static_cast <unsigned int> (_attributes.height)){
+				WindowResize (_attributes.width, _attributes.height);
+				_renderer->UpdateProjection ();
+			}
+			break;
+	 	}
+	 	case ButtonPress:
+	 	{
+	 		_renderer->Mouse (_event.xbutton.button, _event.xbutton.x, _event.xbutton.y);
+	 		break;
+	 	}
+	 	case MotionNotify:
+	 	{
+	 		switch (_event.xmotion.state){
+	 			case Button1Mask:
+	 				_renderer->LeftMouseMotion (_event.xmotion.x, _event.xmotion.y);
+	 				break;
+	 			case Button2Mask:
+	 				_renderer->RightMouseMotion (_event.xmotion.x, _event.xmotion.y);
+	 				break;
+	 			case Button3Mask:
+	 				_renderer->MiddleMouseMotion (_event.xmotion.x, _event.xmotion.y);
+	 				break;
+	 		}
+	 		break;
+	 	}
+	 	case KeyPress :
+	 	{
+			char buff [20];
+			unsigned int buffsize = 20;
+			KeySym key;
+			XComposeStatus compose;
+			XLookupString (&_event.xkey, buff, buffsize, &key, &compose);
+
+			LOG ("Input Key: " << buff);
+			switch (key) {
+
+			case XK_q: case XK_Q: case XK_Escape:
+			{
+		 		Driver::Instance ().Quit ();
+				break;
+			}
+
+			default:
+				break;
+			}
+	 		break;
+	 	}
+	 	default:
+	 		LOG_ERROR ("Unrecognized XEvent");
+	 		break;
+	 	}
+	}
 
 	// method to destroy display window
 	void GLDisplayManager::DestroyWindow ()
@@ -248,6 +328,7 @@ namespace Sim {
 			LOG_ERROR ("Renderer could not be initialized");
 			return false;
 		}
+		_renderer->_owner = this;
 		return true;
 	}
 

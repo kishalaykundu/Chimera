@@ -16,9 +16,7 @@
 
 namespace Sim {
 
-	namespace Assets {
-		class Component;
-	}
+	class Asset;
 
 	class Plugin {
 
@@ -32,7 +30,7 @@ namespace Sim {
 
 			virtual const char* Name () const = 0;
 
-			virtual std::shared_ptr <Assets::Component> Initialize (const char* componentName, const char* config) = 0;
+			virtual bool InitializeAssetComponent (const char* componentName, const char* config, std::shared_ptr <Asset>& asset) = 0;
 			virtual void Cleanup () = 0;
 	};
 

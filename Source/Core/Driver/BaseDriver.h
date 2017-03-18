@@ -82,8 +82,9 @@ namespace Sim {
 
 		public:
 			virtual bool Initialize (const char* configfile) = 0;
-			virtual bool Run () = 0;
-			virtual bool Cleanup () = 0;
+			virtual void Run () = 0;
+			virtual void Cleanup () = 0;
+			virtual void Quit ();
 
 		protected:
 			virtual bool InitializePluginManager (const char* config);

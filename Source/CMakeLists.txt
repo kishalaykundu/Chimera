@@ -57,9 +57,9 @@ endif ()
 ############ Set Scheduler package to be used by compiler #############
 
 if (SCHEDULER_PACKAGE STREQUAL "IntelTBB")
-	option (SIM_TBB_ENABLED "IntelTBB" ON)
+	option (SIM_TBB_SCHEDULER_ENABLED "IntelTBB" ON)
 elseif (SCHEDULER_PACKAGE STREQUAL "Threads")
-	option (SIM_THREADS_ENABLED "Threads" ON)
+	option (SIM_THREAD_SCHEDULER_ENABLED "Threads" ON)
 endif ()
 
 ###################### Set pre-defined variables ######################

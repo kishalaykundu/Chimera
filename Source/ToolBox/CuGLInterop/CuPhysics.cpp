@@ -18,8 +18,8 @@ namespace Sim {
 
 	bool CuPhysics::Initialize (shared_ptr <Sim::GLDisplay>& d)
 	{
-		_display = d->Display ();
-		_context = glXCreateContextAttribsARB (_display, d->Config (), d->Context (), true, d->ContextAttributes ());
+		_display = d->GetDisplay ();
+		_context = glXCreateContextAttribsARB (_display, d->GetConfig (), d->GetContext (), true, d->GetContextAttributes ());
 		if (!_context){
 			cerr << "Could not create GLX context" << endl;
 		  return false;
@@ -31,7 +31,7 @@ namespace Sim {
 
 	void CuPhysics::Run ()
 	{
-		glXMakeContextCurrent (_display, NULL, NULL, _context);
+		glXMakeContextCurrent (_display, 0, 0, _context);
 
 		while (_runFlag){
 

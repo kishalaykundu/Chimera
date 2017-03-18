@@ -29,7 +29,7 @@ namespace Sim {
 
 	bool Mesh::Initialize (const char* vf, const char* ff)
 	{
-		if (!MeshLoader::LoadVertices (vf, _numVertices, _current, _previous)){
+		if (!MeshLoader::LoadVertices (vf, _numVertices, _current)){
 			Cleanup ();
 			return false;
 		}
@@ -42,8 +42,8 @@ namespace Sim {
 
 	void Mesh::Cleanup ()
 	{
-		_current.clear ();
-		_previous.clear ();
-		_faces.clear ();
+		_current.reset ();
+		_previous.reset ();
+		_faces.reset ();
 	}
 }

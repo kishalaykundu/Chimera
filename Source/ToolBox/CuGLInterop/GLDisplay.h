@@ -38,14 +38,16 @@ namespace Sim {
 		::XEvent _event;
 
 	public:
+		GLDisplay ();
+		~GLDisplay ();
 		bool Initialize (std::shared_ptr <Mesh>&);
 		void Run ();
 		void Cleanup ();
 
-		Display* Display () const;
-		GLXFBConfig& Config () const;
-		GLXContext& Context () const;
-		int* ContextAttributes () const;
+		Display* GetDisplay () const;
+		GLXFBConfig GetConfig () const;
+		GLXContext GetContext () const;
+		int* GetContextAttributes () const;
 
 		void DestroyWindow ();
 

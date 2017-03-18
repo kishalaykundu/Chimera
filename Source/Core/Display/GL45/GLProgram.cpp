@@ -8,6 +8,9 @@
  * See GLProgram.h
  */
 
+extern "C" {
+#include <sys/stat.h>
+}
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -23,6 +26,12 @@ using std::ios;
 
 namespace Sim {
 
+	bool fileExists (string& file)
+	{
+		struct stat buffer;
+		return ((file.c_str(), &buffer) == 0);
+	}
+
 	GLProgram::GLProgram (const string& name, const string& location)
 	: _id (0), _name (name), _location (location)
 	{
@@ -30,7 +39,6 @@ namespace Sim {
 		if (_location [_location.size () - 1] != '/'){
 			_location.append ("/");
 		}
-		_location.append (name);
 	}
 
 	GLProgram::~GLProgram ()
@@ -57,6 +65,7 @@ namespace Sim {
 	bool GLProgram::Load ()
 	{
 		if (!Unload ()){
+			LOG_ERROR ("Could not unload GLSL program " << _name << " at " << _location);
 			return false;
 		}
     GLenum error;
@@ -69,9 +78,14 @@ namespace Sim {
 
     GLuint id;
 
-    // load vertex shader
-    string shader (_location + ".vs");
-    if ( !LoadShader (GL_VERTEX_SHADER, shader, id)){
+    // load vertex shader (mandatory)
+    string prefix (_location + _name);
+    string shader (prefix + ".vs");
+    if (!fileExists (shader)){
+    	LOG_ERROR (shader << " does not exist");
+    	return false;
+    }
+    if (!LoadShader (GL_VERTEX_SHADER_ARB, shader, id)){
     	LOG_ERROR (shader.c_str () << " could not be initialized");
       return false;
     }
@@ -83,9 +97,7 @@ namespace Sim {
 
     // load geometry shader (optional)
     shader = string(_location + ".gs");
-    ifstream is;
-    is.open (shader.c_str (), ios::binary);
-    if (!is.fail ()){
+    if (fileExists (shader)){
   		if ( !LoadShader (GL_GEOMETRY_SHADER_ARB, shader, id)){
   			LOG_ERROR (shader.c_str () << " could not be initialized");
         return false;
@@ -100,8 +112,7 @@ namespace Sim {
 #ifdef GL_ARB_tessellation_shader
     // load tessellation control shader (optional)
     shader = string(_location + ".tcs");
-    is.open (shader.c_str (), ios::binary);
-    if (!is.fail ()){
+    if (fileExists (shader)){
   		if ( !LoadShader (GL_TESS_CONTROL_SHADER, shader, id)){
   			LOG_ERROR (shader.c_str () << " could not be initialized");
         return false;
@@ -115,8 +126,7 @@ namespace Sim {
 
     // load tessellation evaluation shader (optional)
     shader = string(_location + ".tes");
-    is.open (shader.c_str (), ios::binary);
-    if (!is.fail ()){
+    if (fileExists (shader)){
   		if ( !LoadShader (GL_TESS_EVALUATION_SHADER, shader, id)){
   			LOG_ERROR (shader.c_str () << " could not be initialized");
         return false;
@@ -129,8 +139,12 @@ namespace Sim {
     }
 #endif
 
-    // load fragment shader
+    // load fragment shader (mandatory)
     shader = string(_location + ".fs");
+    if (!fileExists (shader)){
+    	LOG_ERROR (shader << " does not exist");
+    	return false;
+    }
     if ( !LoadShader (GL_FRAGMENT_SHADER, shader, id)){
     	LOG_ERROR (shader.c_str () << " could not be initialized");
       return false;
@@ -144,8 +158,7 @@ namespace Sim {
 #ifdef GL_ARB_compute_shader
     // load compute shader (optional)
     shader = string(_location + ".cs");
-    is.open (shader.c_str (), ios::binary);
-    if (!is.fail ()){
+    if (fileExists (shader)){
   		if ( !LoadShader (GL_COMPUTE_SHADER, shader, id)){
   			LOG_ERROR (shader.c_str () << " could not be initialized");
         return false;

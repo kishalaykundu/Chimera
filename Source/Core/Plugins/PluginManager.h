@@ -33,7 +33,7 @@ namespace Sim {
 
 		private: // forbidden copy constructor and assignment operator
 			PluginManager (const PluginManager&);
-			PluginManager& operator = (const PluginManager&)
+			PluginManager& operator = (const PluginManager&);
 
 		public:
 			PluginManager ();
