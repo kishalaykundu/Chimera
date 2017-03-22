@@ -14,8 +14,6 @@
 #include "tinyxml2.h"
 #include "Preprocess.h"
 
-#include "Driver.h"
-
 #include "InputParser.h"
 #include "Assets/Asset.h"
 #include "Assets/AssetFactory.h"
@@ -192,25 +190,11 @@ namespace Sim {
 		XMLElement* alist = elem.FirstChildElement ("Asset");
 
 		while (alist != nullptr){
+
 			auto a = _assets.find (alist->UnsignedAttribute ("ID"));
-
-			XMLElement* clist = alist->FirstChildElement ("Component");
-			while (clist != nullptr){
-				const char* type = clist->Attribute ("Type");
-				const char* plugin = clist->Attribute ("LoadingPlugin");
-				if (plugin == nullptr){
-					LOG_ERROR ("No loading plugin specified for " << alist->Attribute ("Name") << "\'s " << type);
-					return false;
-				}
-				const char* config = clist->Attribute ("Config");
-
-				if (!Driver::Instance ().GetPlugin (plugin)->InitializeAssetComponent (type, config, a->second)){
-					LOG_ERROR ("Could not initialize " << type << " component from " << config);
-					return false;
-				}
-				a->second->_components [ComponentId (type)]->SetOwner (a->second);
-
-				clist = clist->NextSiblingElement ("Component");
+			if (!a->second->LoadComponents (*alist)){
+				LOG_ERROR ("Could not load components for asset " << a->second->Id ());
+				return false;
 			}
 
 			alist = alist->NextSiblingElement ("Asset");

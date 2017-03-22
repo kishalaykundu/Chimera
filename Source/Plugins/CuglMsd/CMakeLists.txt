@@ -17,6 +17,7 @@ set (CUGLMSD_REQUIRED_LIBS ${CUGLMSD_REQUIRED_LIBS} ${MATH_LIB} ${XML_LIB} ${OPE
 
 # Add source files from other folders
 set (CUGLMSD_SRCS ${CUGLMSD_SRCS}
+	${SIM_SOURCE_DIR}/Common/GL/GLUtils.cpp
 	${SIM_SOURCE_DIR}/Common/Vector.cpp
 	${SIM_SOURCE_DIR}/Common/InputParser.cpp)
 

@@ -12,7 +12,7 @@
 #include <memory>
 #include "tinyxml2.h"
 
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 #include "X11/X11.h"
 
 #include "Display/DisplayManager.h"
@@ -32,9 +32,12 @@ namespace Sim {
 			unsigned int _height;
 			int _colorDepth;
 
-			::GLXContext _context;
 			::Window _window;
 			::Display *_display;
+			::GLXFBConfig _config;
+			::GLXContext _context;
+			int* _contextAttributes;
+
 			::XWindowAttributes _attributes;
 			::XEvent _event;
 
@@ -52,14 +55,20 @@ namespace Sim {
 			virtual void Cleanup () override;
 
 			// GLX-related methods
-			void MakeContextCurrent ();
-			void ReleaseContext ();
 			void WindowResize (unsigned int, unsigned int);
 			void SwapBuffers ();
 			void WindowMetrics (unsigned int&, unsigned int&, int&, int&, int&) const;
 			unsigned int WindowWidth () const;
 			unsigned int WindowHeight () const;
 			unsigned int WindowColorDepth () const;
+
+			// GLX context helper functions
+			Display* GetDisplay () const;
+			GLXFBConfig GetConfig () const;
+			GLXContext GetContext () const;
+			int* GetContextAttributes () const;
+			void MakeContextCurrent ();
+			void ReleaseContext ();
 
 			unsigned int AddProgram (const char* name, const char* location);
 			unsigned int GetProgramId (const char* name) const;

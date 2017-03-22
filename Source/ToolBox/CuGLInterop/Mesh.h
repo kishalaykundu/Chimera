@@ -22,7 +22,6 @@ namespace Sim {
 
 		unsigned int _numVertices;
 		std::shared_ptr <Vector> _current;
-		std::shared_ptr <Vector> _previous;
 
 		unsigned int _numFaces;
 		std::shared_ptr <unsigned int> _faces;

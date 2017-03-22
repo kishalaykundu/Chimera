@@ -9,11 +9,11 @@
 	</ComponentIdMap>
 
 	<Assets>
-		<Asset Name="Kidney" ID="42967" Type="Deformable_MSD">
-			<Component Type="Geometry" LoadingPlugin="CpuMsd" Config="Assets/Data/Kidney/Mesh/kidney.geom.xml"/>
-			<Component Type="Physics" LoadingPlugin="CpuMsd" Config="Assets/Data/Kidney/Mesh/kidney.msd.xml"/>
-			<Component Type="Render" LoadingPlugin="CpuMsd" Config="Assets/Data/Kidney/Mesh/kidney.gpu.xml"/>
-			<Component Type="Collision" LoadingPlugin="CpuCollision" Config="None"/>
+		<Asset Name="Kidney" ID="42967" Type="Deformable_MSD" Config="Assets/Config/Kidney.msd.xml">
+			<Component Type="Geometry" LoadingPlugin="CpuMsd"/>
+			<Component Type="Render" LoadingPlugin="CpuMsd"/>
+			<Component Type="Physics" LoadingPlugin="CpuMsd"/>
+			<Component Type="Collision" LoadingPlugin="CpuCollision"/>
 		</Asset>
 	</Assets>
 		

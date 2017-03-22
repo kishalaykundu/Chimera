@@ -14,36 +14,32 @@
 #pragma once
 
 #include <string>
-#include <memory>
+#include "tinyxml2.h"
 
 namespace Sim {
 
-	class AssetFactory;
 	class Asset;
 
 	namespace Assets {
 
 		class Component {
 
-				friend class Sim::AssetFactory;
+				friend class Sim::Asset;
 
 			protected:
-				std::shared_ptr <Asset> _owner;
+				Asset* _owner;
 
 			public:
-				Component () {}
+				Component () : _owner (nullptr) {}
 				Component (const Component& c): _owner (c._owner) {}
 				Component& operator = (const Component& c) { _owner = c._owner; return *this;}
-				virtual ~Component () {_owner.reset ();}
+				virtual ~Component () {_owner = nullptr;}
 
 				virtual const std::string Name () const = 0;
 
-				virtual bool Initialize (const char*) = 0;
+				virtual bool Initialize (tinyxml2::XMLElement& config, Asset* asset) = 0;
 				virtual void Update () = 0;
 				virtual void Cleanup () = 0;
-
-			protected:
-				void SetOwner (std::shared_ptr <Asset> a) {_owner = a;}
 		};
 	}
 }

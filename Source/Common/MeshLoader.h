@@ -21,7 +21,8 @@ namespace Sim {
 	class MeshLoader {
 
 	public:
-		static bool LoadVertices (const char* file, unsigned int& numVerts, shared_ptr <Vector>& v1)
+		// triple-buffered vertex buffer loading function
+		static bool LoadVertices (const char* file, unsigned int& numVerts, shared_ptr <Vector>& vertices)
 		{
 			FILE* fp = fopen (file, "r");
 			if (fp == nullptr){
@@ -37,13 +38,13 @@ namespace Sim {
 				return false;
 			}
 			numVerts = static_cast <unsigned int> (nVerts);
-			v1 = shared_ptr <Vector> (new Vector [numVerts], DeleteArray <Vector> ());
-			if (!v1){
+			vertices = shared_ptr <Vector> (new Vector [3*numVerts], DeleteArray <Vector> ());
+			if (!vertices){
 				LOG_ERROR ("Could not allocate 1st vertex array of size " << numVerts << " from " << file);
 				return false;
 			}
 
-			Vector* vptr = v1.get ();
+			Vector* vptr = vertices.get ();
 			Real verts [SIM_VECTOR_SIZE];
 #			ifdef SIM_VECTOR4_ENABLED
 			verts [3] = 1.;
@@ -68,10 +69,44 @@ namespace Sim {
 			}
 			fclose (fp);
 
+			// populate 2nd buffer
+			unsigned int offset = numVerts;
+			for (unsigned int i = 0; i < numVerts; ++i){
+				vptr [offset + i] = vptr [i];
+			}
+
+			// populate 3rd buffer
+			offset *= 2;
+			for (unsigned int i = 0; i < numVerts; ++i){
+				vptr [offset + i] = vptr [i];
+			}
+
 			return true;
 		}
 
-		static bool LoadIndices (const char* file, unsigned int n, unsigned int& numIndices, shared_ptr <unsigned int>& indices)
+		// function to get number of elements in an index file
+		static unsigned int GetIndexCount(const char* file)
+		{
+			FILE* fp = fopen (file, "r");
+			if (fp == nullptr){
+				LOG_ERROR ("Could not open " << file);
+				return 0;
+			}
+
+			int nInds = 0;
+			int status = fscanf (fp, "%d\n", &nInds);
+			if (!status || nInds <= 0){
+				LOG_ERROR ("Invalid index count " << nInds << " specified in " << file);
+				fclose (fp);
+				return 0;
+			}
+			fclose (fp);
+
+			return static_cast <unsigned int> (nInds);
+		}
+
+		// function to load indices from file (assumes pre-allocated index array)
+		static bool LoadIndices (const char* file, unsigned int n, unsigned int* indices)
 		{
 			// sanity check
 			if (n < 2 || n > 4){
@@ -92,10 +127,7 @@ namespace Sim {
 				fclose (fp);
 				return false;
 			}
-			unsigned int* iptr = indices.get ();
-
-			numIndices = static_cast <unsigned int> (nInds);
-			indices = shared_ptr <unsigned int> (new unsigned int [n*numIndices], DeleteArray <unsigned int> ());
+			unsigned int numIndices = static_cast <unsigned int> (nInds);
 
 			int inds [4];
 			inds [0] = 0; inds [1] = 0; inds [2] = 0; inds [3] = 0;
@@ -112,7 +144,7 @@ namespace Sim {
 					}
 #					endif
 					for (unsigned int j = 0; j < 2; ++j){
-						iptr [2*i + j] = static_cast <unsigned int> (inds [j]);
+						indices [2*i + j] = static_cast <unsigned int> (inds [j]);
 					}
 				}
 				break;
@@ -127,7 +159,7 @@ namespace Sim {
 					}
 #					endif
 					for (unsigned int j = 0; j < 3; ++j){
-						iptr [3*i + j] = static_cast <unsigned int> (inds [j]);
+						indices [3*i + j] = static_cast <unsigned int> (inds [j]);
 					}
 				}
 				break;
@@ -143,7 +175,7 @@ namespace Sim {
 					}
 #					endif
 					for (unsigned int j = 0; j < 4; ++j){
-						iptr [4*i + j] = static_cast <unsigned int> (inds [j]);
+						indices [4*i + j] = static_cast <unsigned int> (inds [j]);
 					}
 				}
 				break;

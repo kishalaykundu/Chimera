@@ -11,7 +11,7 @@
 
 #include <memory>
 
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 #include "X11/X11.h"
 
 namespace Sim {

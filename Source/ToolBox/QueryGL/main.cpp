@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 #include "X11/X11.h"
 
 using std::cout;

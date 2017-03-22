@@ -49,31 +49,34 @@ namespace Sim {
 
 			void AddComponent (const char* name, std::shared_ptr <Assets::Component> component)
 			{
-				_components [AssetFactory::ComponentId (name)] = component;
+				component->_owner = const_cast <Asset*> (this);
+				_components [AssetFactory::ComponentId (name)] = std::move (component);
 			}
 
-			template <class ComponentType> std::weak_ptr <ComponentType> GetComponent (const char* name)
+			template <class ComponentType> std::shared_ptr <ComponentType> GetComponent (unsigned int id)
+			{
+				auto it = _components.find (id);
+
+#				ifndef NDEBUG
+				if (it != _components.end ()){
+					std::shared_ptr <Assets::Component> component (it->second);
+					return std::shared_ptr <ComponentType> (std::static_pointer_cast <ComponentType> (component));
+				}
+				LOG_ERROR ("Component" << id << "not found...returning empty component");
+				return std::shared_ptr <ComponentType> ();
+#				else
+				std::shared_ptr <Assets::Component> component (it->second);
+				return std::shared_ptr <ComponentType> (std::static_pointer_cast <ComponentType> (component));
+#				endif
+			}
+
+			template <class ComponentType> std::shared_ptr <ComponentType> GetComponent (const char* name)
 			{
 				unsigned int id = AssetFactory::ComponentId (name);
-				auto it = _components.find (id);
-				if (it != _components.end ()){
-					std::shared_ptr <Assets::Component> genericComponent (it->second);
-					std::shared_ptr <ComponentType> component (std::static_pointer_cast <ComponentType> (genericComponent));
-					return std::weak_ptr <ComponentType> (component);
-				}
-				return std::weak_ptr <ComponentType> ();
+				return GetComponent <ComponentType> (id);
 			}
 
-			template <class ComponentType> std::weak_ptr <ComponentType> GetComponent (unsigned int id)
-			{
-				auto it = _components.find (id);
-				if (it != _components.end ()){
-					std::shared_ptr <Assets::Component> genericComponent (it->second);
-					std::shared_ptr <ComponentType> component (std::static_pointer_cast <ComponentType> (genericComponent));
-					return std::weak_ptr <ComponentType> (component);
-				}
-				return std::weak_ptr <ComponentType> ();
-			}
-
+		protected:
+			bool LoadComponents (tinyxml2::XMLElement&);
 	};
 }

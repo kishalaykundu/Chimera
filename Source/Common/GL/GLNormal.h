@@ -13,7 +13,7 @@
 #include <memory>
 
 #include "Preprocess.h"
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 
 namespace Sim {
 

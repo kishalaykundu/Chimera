@@ -16,7 +16,7 @@ extern "C" {
 #include <fstream>
 
 #include "Preprocess.h"
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 
 #include "Display/GL45/GLProgram.h"
 

@@ -1,56 +1,60 @@
 /**
- * @file GL.h
+ * @file GLUtils.cpp
  * @author Kishalay Kundu <kishalay.kundu@gmail.com>
  * @section LICENSE
  * See LICENSE.txt included in this package
  *
  * @section DESCRIPTION
- * Platform-dependent OpenGL header files.
+ * See GLUtils.h.
  */
-#pragma once
 
-#define GL_GLEXT_PROTOTYPES 1
-
-#if defined (__linux__) || defined (__APPLE__) || defined (MACOSX)
-#	define GLX_GLXEXT_PROTOTYPES 1
-#	define SIM_GLX_MIN_MAJOR_VERSION 1
-#	define SIM_GLX_MIN_MINOR_VERSION 4
-#endif
-
-extern "C" {
-
-#if defined( __APPLE__ ) || defined( MACOSX )
-#	include <OpenGL/gl.h>
-#	include <OpenGL/glext.h>
-#	include <OpenGL/glx.h>
-#	include <OpenGL/glxext.h>
-#else
-#	include <GL/glx.h>
-#	include <GL/glxext.h>
-#	include <GL/gl.h>
-#	include <GL/glext.h>
-#endif
-
-}
-
-#define SIM_GL_MIN_MAJOR_VERSION 4
-#define SIM_GL_MIN_MINOR_VERSION 5
-
-#define SIM_GLX_MIN_MAJOR_VERSION 1
-#define SIM_GLX_MIN_MINOR_VERSION 4
-
-#if defined (__linux__) || defined (__APPLE__) || defined (MACOSX)
-	typedef GLXContext GPU_CONTEXT;
-#endif
-
-#if !defined(NDEBUG) && defined(SIM_GL_DEBUG)
-#	include <cstring> // basename (...) is defined in cstring
 #	include <iostream>
+#include "GL/GLUtils.h"
+
+namespace Sim {
+
+	void _checkGLError (const char* file, int line)
+	{
+		GLenum error (glGetError ());
+		while (error != GL_NO_ERROR){
+
+			std::cerr << file << " [" << line << "]: GL Error: GL_";
+			switch (error){
+			case GL_INVALID_ENUM:
+				std::cerr << "INVALID_ENUM" << std::endl;
+				break;
+			case GL_INVALID_VALUE:
+				std::cerr << "INVALID_VALUE" << std::endl;
+				break;
+			case GL_INVALID_OPERATION:
+				std::cerr << "INVALID_OPERATION" << std::endl;
+				break;
+			case GL_STACK_OVERFLOW:
+				std::cerr << "STACK_OVERFLOW" << std::endl;
+				break;
+			case GL_STACK_UNDERFLOW:
+				std::cerr << "STACK_UNDERFLOW" << std::endl;
+				break;
+			case GL_OUT_OF_MEMORY:
+				std::cerr << "OUT_OF_MEMORY" << std::endl;
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				std::cerr << "INVALID_FRAMEBUFFER_OPERATION" << std::endl;
+				break;
+			default:
+				std::cerr << "UNKNOWN_ERROR (" << error << ")" << std::endl;
+			}
+
+			error = glGetError ();
+		}
+	}
+
+#	ifdef SIM_GL_DEBUG_ENABLED
 	void APIENTRY GLDebugMessage (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
 			const GLchar* message, const void* parameters)
 	{
 		std::cerr << basename( __FILE__ ) << "[" << __LINE__ << "]: GL error:" << std::endl;
-		std::cerr << "ID - [" << id << "] Type - ";
+		std::cerr << "ID - [" << id << "] Type - GL_";
 		switch (type) {
 			case GL_DEBUG_TYPE_ERROR:
 				std::cerr << "ERROR";
@@ -86,4 +90,6 @@ extern "C" {
 		std::cerr << std::endl;
 		std::cerr << message << std::endl;
 	}
-#endif
+#	endif
+
+}

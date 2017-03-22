@@ -30,38 +30,30 @@ namespace Sim {
 	namespace Assets {
 
 		Geometry::Geometry ()
-		: _numVertices (0), _numSurfaceVertices (0), _numSubsets (1)
+		: _offsetIndex (1), _offsetSize (0), _numVertices (0),
+			_numSurfaceVertices (0), _numFaces (0), _numSubsets (1)
 		{}
 
-		bool Geometry::Initialize (const char* config)
+		bool Geometry::Initialize (XMLElement& config, Asset* asset)
 		{
-			InputParser ip;
-			if (!ip.Initialize (config, "MeshGeometry")){
-				LOG_ERROR ("Could not open " << config << " with required root \'MeshGeometry\'");
+			// get asset name prefix
+			const char* name = config.Attribute ("Prefix");
+			if (name == nullptr){
+				LOG_ERROR ("No asset geometry \'Prefix\' specified (mandatory)");
 				return false;
 			}
-
-			// get asset name
-			const XMLElement* elem = ip.GetElement ("Name");
-			if (elem == nullptr){
-				LOG_ERROR ("No asset geometry \'Name\' specified (mandatory)");
-				return false;
-			}
-			const char* name = elem->Value ();
 
 			// get asset location
-			elem = ip.GetElement ("Location");
-			if (elem == nullptr){
+			const char* location = config.Attribute ("Location");
+			if (location == nullptr){
 				LOG_ERROR ("No asset geometry \'Location\' specified (mandatory)");
 				return false;
 			}
-			const char* location = elem->Value ();
 
 			unsigned int depth = 0;
-			elem = ip.GetElement ("Depth");
 			XMLError error;
-			if ((error = elem->QueryUnsignedText(&depth)) != tinyxml2::XML_SUCCESS){
-				LOG_ERROR ("Error reading partition depth from " << config);
+			if ((error = config.QueryUnsignedAttribute("Depth", &depth)) != tinyxml2::XML_SUCCESS){
+				LOG_ERROR ("Could not read partition depth");
 				return false;
 			}
 			for (unsigned int i = 0; i < depth; ++i){
@@ -92,44 +84,42 @@ namespace Sim {
 				return false;
 			}
 			UpdateSurfaceVertexCount ();
+			_offsetSize = SIM_VECTOR_SIZE * sizeof (Vector) * _numVertices;
 
 			return true;
 		}
 
 		void Geometry::Update ()
 		{
-			_current.swap (_previous);
-			for (unsigned int i = 0; i < _numSubsets; ++i){
-				_subsets.get () [i].UpdateBound (_current);
-			}
+			++_offsetIndex;
 		}
 
 		void Geometry::Cleanup ()
 		{
-			_current.reset ();
-			_previous.reset ();
+			_vertices.reset ();
+			_faces.reset ();
 			_subsets.reset ();
 		}
 
 		bool Geometry::ReadVertexFile (const char* file)
 		{
-			if (!MeshLoader::LoadVertices (file, _numVertices, _current)){
+			if (!MeshLoader::LoadVertices (file, _numVertices, _vertices)){
 				LOG_ERROR ("Could not read vertex file " << file);
 				return false;
 			}
 
 			// update axis-aligned bounding box
-			Vector min (_current.get () [0]);
+			Vector min (_vertices.get () [0]);
 			Vector max (min);
 			for (unsigned int i = 1; i < _numVertices; ++i){
 				for (unsigned int j = 0; j < 3; ++j){
-					if (min [j] > _current.get () [i][j]){
-						min [j] = _current.get () [i][j];
+					if (min [j] > _vertices.get () [i][j]){
+						min [j] = _vertices.get () [i][j];
 					}
 				}
 				for (unsigned int j = 0; j < 3; ++j){
-					if (max [j] < _current.get () [i][j]){
-						max [j] = _current.get () [i][j];
+					if (max [j] < _vertices.get () [i][j]){
+						max [j] = _vertices.get () [i][j];
 					}
 				}
 			}
@@ -141,6 +131,7 @@ namespace Sim {
 		{
 			_subsets = shared_ptr <SpatialSubset> (new SpatialSubset [_numSubsets], DeleteArray <SpatialSubset> ());
 
+			// get total number of faces
 			for (unsigned int i = 0; i < _numSubsets; ++i){
 				string file (prefix);
 				file += ".";
@@ -148,23 +139,47 @@ namespace Sim {
 				file += ".tri";
 
 				SpatialSubset* s = &(_subsets.get () [i]);
-				if (!MeshLoader::LoadIndices (file.c_str (), 3, s->_numFaces, s->_faces)){
+				s->_isize = MeshLoader::GetIndexCount (file.c_str ());
+				s->_ioffset = 3*_numFaces;
+				_numFaces += s->_isize;
+			}
+
+			// initialize face index array
+			_faces = shared_ptr <unsigned int> (new unsigned int [3*_numFaces], DeleteArray <unsigned int> ());
+
+			for (unsigned int i = 0; i < _numSubsets; ++i){
+				string file (prefix);
+				file += ".";
+				file += std::to_string (i);
+				file += ".tri";
+
+				SpatialSubset* s = &(_subsets.get () [i]);
+				unsigned int* f = &(_faces.get () [s->_ioffset]);
+				if (!MeshLoader::LoadIndices (file.c_str (), 3, f)){
 					LOG_ERROR ("Could not load index file " <<  file);
 					return false;
 				}
 
-				s->UpdateBound (_current);
+				// calculate the offset of vertex
+				unsigned int min = f [0];
+				for (unsigned int j = 1; j < 3*s->_isize; ++j){
+					if (min > f [j]){
+						min = f [j];
+					}
+				}
+				s->_voffset = min;
+
+				s->UpdateBound (CurrentVertexBuffer (), f);
 			}
 			return true;
 		}
 
 		void Geometry::UpdateSurfaceVertexCount ()
 		{
-			for (unsigned int i = 0; i < _numSubsets; ++i){
-				for (unsigned int j = 0; j < 3*_subsets.get () [i]._numFaces; ++j){
-					if (_numSurfaceVertices < _subsets.get () [i]._faces.get () [j]){
-						_numSurfaceVertices = _subsets.get () [i]._faces.get () [j];
-					}
+			unsigned int* f = _faces.get ();
+			for (unsigned int i = 0; i < 3*_numFaces; ++i){
+				if (_numSurfaceVertices < f [i]){
+					_numSurfaceVertices = f [i];
 				}
 			}
 			// this is done because at this point _numSurfaceVertices

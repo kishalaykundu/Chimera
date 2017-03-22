@@ -14,6 +14,7 @@
 #include "tinyxml2.h"
 #include "Preprocess.h"
 
+#include "InputParser.h"
 #include "Driver.h"
 #include "Plugins/Plugin.h"
 
@@ -54,6 +55,7 @@ namespace Sim {
 			}
 			shared_ptr <Component> c;
 			_components [cid] = c;
+			_components [cid]->_owner = const_cast <Asset*> (this);
 
 			clist = clist->NextSiblingElement ("Component");
 		}
@@ -67,4 +69,49 @@ namespace Sim {
 		_components.clear ();
 	}
 
+	bool Asset::LoadComponents (XMLElement& elem)
+	{
+		// get the name of the config file for the asset
+		const char* config = elem.Attribute ("Config");
+		if (config == nullptr){
+			LOG_ERROR ("No config file specified for " << elem.Attribute ("Name"));
+			return false;
+		}
+
+		InputParser parser;
+		if (!parser.Initialize (config, "AssetConfig")){
+			LOG_ERROR ("Could not initialize parser for " << config);
+			return false;
+		}
+
+		XMLElement* clist = elem.FirstChildElement ("Component");
+
+		while (clist != nullptr){
+			const char* type = clist->Attribute ("Type");
+			const char* plugin = clist->Attribute ("LoadingPlugin");
+			if (plugin == nullptr){
+				LOG_ERROR ("No loading plugin specified for " << elem.Attribute ("Name") << "\'s " << type);
+				return false;
+			}
+
+			XMLElement* telem = parser.GetElement (type);
+			if (telem == nullptr){
+				LOG_ERROR ("No specification for " << type << " found in " << config);
+				return false;
+			}
+
+			shared_ptr <Plugin> p = Driver::Instance ().GetPlugin (plugin);
+			if (!p){
+				LOG_ERROR ("Plugin " << plugin << " not found");
+				return false;
+			}
+			if (!p->InitializeAssetComponent (type, *telem, const_cast <Asset*> (this))){
+				LOG_ERROR ("Could not initialize " << type << " component from " << config);
+				return false;
+			}
+
+			clist = clist->NextSiblingElement ("Component");
+		}
+		return true;
+	}
 }

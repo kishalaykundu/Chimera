@@ -11,7 +11,7 @@
 
 #include "Preprocess.h"
 
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 
 #include "Assets/AssetFactory.h"
 #include "Display/GL45/GLDisplayManager.h"
@@ -44,9 +44,23 @@ namespace Sim {
 			virtual void Run ();
 			virtual void Cleanup ();
 
-			void AddPlugin (unsigned int id, std::shared_ptr <Plugin> p) {_pluginManager->AddPlugin (id, p);}
-			std::shared_ptr <Plugin> GetPlugin (unsigned int id) {return _pluginManager->GetPlugin (id);}
-			std::shared_ptr <Plugin> GetPlugin (const char* name) {return _pluginManager->GetPlugin (name);}
+			// display-related methods
+			Display* GetGPUDisplay () const
+			{
+				return static_cast <GLDisplayManager*> (_displayManager.get ())->GetDisplay();
+			}
+			GLXFBConfig GetGPUConfig () const
+			{
+				return static_cast <GLDisplayManager*> (_displayManager.get ())->GetConfig ();
+			}
+			GLXContext GetGPUContext () const
+			{
+				return static_cast <GLDisplayManager*> (_displayManager.get ())->GetContext ();
+			}
+			int* GetGPUContextAttributes () const
+			{
+				return static_cast <GLDisplayManager*> (_displayManager.get ())->GetContextAttributes ();
+			}
 
 			GLuint AddGPUProgram (const char* name, const char* location)
 			{
@@ -60,6 +74,11 @@ namespace Sim {
 			{
 				return static_cast <GLDisplayManager*> (_displayManager.get ())->ReloadProgram (id);
 			}
+
+			// numerical plugin-related methods
+			void AddPlugin (unsigned int id, std::shared_ptr <Plugin> p) {_pluginManager->AddPlugin (id, p);}
+			std::shared_ptr <Plugin> GetPlugin (unsigned int id) const {return _pluginManager->GetPlugin (id);}
+			std::shared_ptr <Plugin> GetPlugin (const char* name) const {return _pluginManager->GetPlugin (name);}
 
 		protected:
 			bool InitializeGLDisplay (const char* config);

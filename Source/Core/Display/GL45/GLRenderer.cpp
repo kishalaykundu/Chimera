@@ -15,7 +15,7 @@
 
 #include "tinyxml2.h"
 #include "Preprocess.h"
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 
 #include "Display/GL45/GLDisplayManager.h"
 #include "Display/GL45/GLProgram.h"

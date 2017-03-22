@@ -11,13 +11,15 @@
 #pragma once
 
 #include <memory>
+#include "tinyxml2.h"
 
 #include "Plugins/Plugin.h"
-#include "Assets/Component.h"
 
 namespace Sim {
 
-	class CuglMsd : public Plugin {
+	class Asset;
+
+	class EXPORT CuglMsd : public Plugin {
 
 	public:
 		CuglMsd ();
@@ -25,12 +27,12 @@ namespace Sim {
 
 		virtual const char* Name () const override {return "CuglMsd";}
 
-		virtual bool InitializeAssetComponent (const char* componentName, const char* config, std::shared_ptr <Asset>& asset) override;
+		virtual bool InitializeAssetComponent (const char* componentName, tinyxml2::XMLElement& config, Asset* asset) override;
 		virtual void Cleanup () override;
 
 	protected:
-		bool InitializeGeometry (const char* config, std::shared_ptr <Asset>& asset);
-		bool InitializeRender (const char* config, std::shared_ptr <Asset>& asset);
-		bool InitializePhysics (const char* config, std::shared_ptr <Asset>& asset);
+		bool InitializeGeometry (tinyxml2::XMLElement& config, Asset* asset);
+		bool InitializeRender (tinyxml2::XMLElement& config, Asset* asset);
+		bool InitializePhysics (tinyxml2::XMLElement& config, Asset* asset);
 	};
 }

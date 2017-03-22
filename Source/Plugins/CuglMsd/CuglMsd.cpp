@@ -19,9 +19,10 @@
 #include "Assets/Asset.h"
 #include "Assets/Component.h"
 #include "Assets/Geometry.h"
-#include "Assets/Render.h"
-#include "Assets/Physics.h"
+
 #include "CuglMsd.h"
+#include "CuglMsdRender.h"
+#include "CuglMsdPhysics.h"
 
 using std::shared_ptr;
 using std::make_shared;
@@ -47,33 +48,16 @@ namespace Sim {
 		LOG ("CuglMsd plugin destroyed");
 	}
 
-	bool CuglMsd::InitializeAssetComponent (const char* componentName, const char* config, shared_ptr <Asset>& asset)
+	bool CuglMsd::InitializeAssetComponent (const char* componentName, XMLElement& config, Asset* asset)
 	{
-		InputParser parser;
-		if (!parser.Initialize (config, "MsdConfig")){
-			LOG_ERROR ("Could not initialize parser for " << config);
-			return false;
-		}
-
-		XMLElement* element = parser.GetElement (componentName);
-		if (element != nullptr){
-			LOG_ERROR (componentName << " component not specified in " << config);
-			return false;
-		}
-		const char* configfile = element->Attribute ("Config");
-		if (config == nullptr){
-			LOG_ERROR ("Config file not specified for " << componentName);
-			return false;
-		}
-
 		if (!strcmp ("Geometry", componentName)){
-			return InitializeGeometry (configfile, asset);
+			return InitializeGeometry (config, asset);
 		}
 		else if (!strcmp ("Render", componentName)){
-			return InitializeRender (configfile, asset);
+			return InitializeRender (config, asset);
 		}
 		else if (!strcmp ("Physics", componentName)){
-			return InitializePhysics (configfile, asset);
+			return InitializePhysics (config, asset);
 		}
 		LOG_ERROR ("Invalid component " << componentName);
 		return false;
@@ -83,24 +67,35 @@ namespace Sim {
 	{ }
 
 	// initialize geometry component (using generic definition of Geometry from Asset folder)
-	bool CuglMsd::InitializeGeometry (const char* config, std::shared_ptr <Asset>& asset)
+	bool CuglMsd::InitializeGeometry (XMLElement& config, Asset* asset)
 	{
 		shared_ptr <Assets::Geometry> gc = make_shared <Assets::Geometry> ();
-		if (!gc->Initialize (config)){
-			LOG_ERROR ("Could not initialize geometry component from " << config);
+		if (!gc->Initialize (config, asset)){
+			LOG_ERROR ("Could not initialize geometry component");
 			return false;
 		}
-		asset->AddComponent ("Geometry", static_pointer_cast <Assets::Component> (gc));
+		asset->AddComponent ("Geometry", gc);
 		return true;
 	}
 
-	bool CuglMsd::InitializeRender (const char* config, std::shared_ptr <Asset>& asset)
+	bool CuglMsd::InitializeRender (XMLElement& config, Asset* asset)
 	{
+		shared_ptr <Assets::CuglMsdRender> rc = make_shared <Assets::CuglMsdRender> ();
+		if (!rc->Initialize (config, asset)){
+			LOG_ERROR ("Could not initialize render component");
+			return false;
+		}
+		asset->AddComponent ("Render", rc);
 		return true;
 	}
 
-	bool CuglMsd::InitializePhysics (const char* config, std::shared_ptr <Asset>& asset)
+	bool CuglMsd::InitializePhysics (XMLElement& config, Asset* asset)
 	{
+		shared_ptr <Assets::CuglMsdPhysics> pc = make_shared <Assets::CuglMsdPhysics> ();
+		if (!pc->Initialize (config, asset)){
+			LOG_ERROR ("Could not initialize physics component");
+			return false;
+		}
 		return true;
 	}
 }

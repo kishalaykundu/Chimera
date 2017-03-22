@@ -13,6 +13,7 @@
 #pragma once
 
 #include <memory>
+#include "tinyxml2.h"
 
 namespace Sim {
 
@@ -30,7 +31,7 @@ namespace Sim {
 
 			virtual const char* Name () const = 0;
 
-			virtual bool InitializeAssetComponent (const char* componentName, const char* config, std::shared_ptr <Asset>& asset) = 0;
+			virtual bool InitializeAssetComponent (const char* componentName, tinyxml2::XMLElement& config, Asset* asset) = 0;
 			virtual void Cleanup () = 0;
 	};
 

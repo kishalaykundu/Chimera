@@ -22,6 +22,8 @@ set (SIM_CORE_DIR ${SIM_SOURCE_DIR}/Core)
 
 # Add source files from other folders
 set (APP_SRCS ${APP_SRCS}
+	${SIM_SOURCE_DIR}/Common/GL/GLUtils.cpp
+	${SIM_SOURCE_DIR}/Common/CUDA/CUDAUtils.cpp
 	${SIM_SOURCE_DIR}/Common/Vector.cpp
 	${SIM_SOURCE_DIR}/Common/InputParser.cpp
 	${SIM_SOURCE_DIR}/Core/Assets/Geometry.cpp)

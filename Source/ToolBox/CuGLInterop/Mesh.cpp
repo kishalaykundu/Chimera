@@ -33,7 +33,9 @@ namespace Sim {
 			Cleanup ();
 			return false;
 		}
-		if (!MeshLoader::LoadIndices (ff, 3, _numFaces, _faces)){
+		_numFaces = MeshLoader::GetIndexCount (ff);
+		_faces = shared_ptr <unsigned int> (new unsigned int [3*_numFaces], DeleteArray <unsigned int> ());
+		if (!MeshLoader::LoadIndices (ff, 3, _faces.get ())){
 			Cleanup ();
 			return false;
 		}
@@ -43,7 +45,6 @@ namespace Sim {
 	void Mesh::Cleanup ()
 	{
 		_current.reset ();
-		_previous.reset ();
 		_faces.reset ();
 	}
 }

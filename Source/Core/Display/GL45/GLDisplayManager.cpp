@@ -25,7 +25,7 @@ namespace Sim {
 
 	// default constructor
 	GLDisplayManager::GLDisplayManager ()
-	: _top (0), _left (0), _width (256), _height (256), _colorDepth (16), _context (0), _display (nullptr)
+	: _top (0), _left (0), _width (256), _height (256), _colorDepth (16), _display (nullptr), _context (0)
 	{
 		LOG ("OpenGL display manager constructed");
 	}
@@ -85,14 +85,6 @@ namespace Sim {
 	}
 
 	// GLX-Window related methods
-	void GLDisplayManager::MakeContextCurrent ()
-	{
-		glXMakeContextCurrent (_display, _window, _window, _context);
-	}
-	void GLDisplayManager::ReleaseContext ()
-	{
-    glXMakeContextCurrent (_display, None, None, NULL);
-	}
 	void GLDisplayManager::WindowResize (unsigned int width, unsigned int height)
 	{
 		_width = width;
@@ -115,6 +107,19 @@ namespace Sim {
 	unsigned int GLDisplayManager::WindowWidth () const {return _width;}
 	unsigned int GLDisplayManager::WindowHeight () const {return _height;}
 	unsigned int GLDisplayManager::WindowColorDepth () const {return static_cast <unsigned int> (_colorDepth);}
+
+	Display* GLDisplayManager::GetDisplay () const {return _display;}
+	GLXFBConfig GLDisplayManager::GetConfig () const {return _config;}
+	GLXContext GLDisplayManager::GetContext () const {return _context;}
+	int* GLDisplayManager::GetContextAttributes () const {return _contextAttributes;}
+	void GLDisplayManager::MakeContextCurrent ()
+	{
+		glXMakeContextCurrent (_display, _window, _window, _context);
+	}
+	void GLDisplayManager::ReleaseContext ()
+	{
+    glXMakeContextCurrent (_display, None, None, NULL);
+	}
 
 	GLuint GLDisplayManager::AddProgram (const char* name, const char* location)
 	{
@@ -266,11 +271,11 @@ namespace Sim {
 	  	}
 	  	XFree (info);
 	  }
-	  GLXFBConfig config = fbConfig [bestFB];
+	  _config = fbConfig [bestFB];
 	  XFree (fbConfig);
 
 	  // get an X Visual
-	  XVisualInfo* info = glXGetVisualFromFBConfig (_display, config);
+	  XVisualInfo* info = glXGetVisualFromFBConfig (_display, _config);
 	  XSetWindowAttributes swa;
 	  Colormap cmap;
 	  swa.colormap = cmap = XCreateColormap(_display, RootWindow (_display, info->screen), info->visual, AllocNone );
@@ -296,14 +301,21 @@ namespace Sim {
 		XMapWindow (_display, _window);
 
 		// create new context
-		int contextAttributes [] = {
-				GLX_CONTEXT_MAJOR_VERSION_ARB, SIM_GL_MIN_MAJOR_VERSION,
-				GLX_CONTEXT_MINOR_VERSION_ARB, SIM_GL_MIN_MINOR_VERSION,
-#				ifndef NDEBUG
-				GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
-#				endif
-		};
-		_context = glXCreateContextAttribsARB (_display, config, 0, true, contextAttributes);
+#		ifndef NDEBUG
+		_contextAttributes = new int [7];
+		_contextAttributes [4] = GLX_CONTEXT_FLAGS_ARB;
+		_contextAttributes [5] = GLX_CONTEXT_DEBUG_BIT_ARB;
+		_contextAttributes [6] = None;
+#		else
+		_contextAttributes = new int [5];
+		_contextAttributes [4] = None;
+#		endif
+		_contextAttributes [0] = GLX_CONTEXT_MAJOR_VERSION_ARB;
+		_contextAttributes [1] = SIM_GL_MIN_MAJOR_VERSION;
+		_contextAttributes [2] = GLX_CONTEXT_MINOR_VERSION_ARB;
+		_contextAttributes [3] = SIM_GL_MIN_MINOR_VERSION;
+
+		_context = glXCreateContextAttribsARB (_display, _config, 0, true, _contextAttributes);
 		if (!_context){
 			LOG_ERROR ("Could not create GLX context");
 		  return false;
@@ -313,9 +325,6 @@ namespace Sim {
 	  } else {
 	  	LOG ("Indirect GL rendering context available");
 	  }
-
-	  // make created context current
-		MakeContextCurrent ();
 
 		return true;
 	}

@@ -15,7 +15,7 @@
 
 #include "tinyxml2.h"
 #include "Preprocess.h"
-#include "GL/GL.h"
+#include "GL/GLUtils.h"
 
 #include "AxisAlignedBox.h"
 

@@ -25,7 +25,7 @@ namespace Sim {
 
 				virtual const std::string Name () const final {return "Physics";}
 
-				virtual bool Initialize (const char*) override {return false;}
+				virtual bool Initialize (tinyxml2::XMLElement& config, Asset* asset) override {return false;}
 				virtual void Update () override {}
 				virtual void Cleanup () override {}
 		};
