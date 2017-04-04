@@ -22,9 +22,11 @@ using Sim::Driver;
 int main (int argc, const char** argv)
 {
 	// sanity check
-		if (argc == 2 || (!strcmp (argv [1], "-h") || !strcmp (argv [1], "--help"))){
-			LOG ("Usage: ./Bin/simulate <config file> (default: Assets/Config/ChimeraConfig.xml)");
-			exit (EXIT_SUCCESS);
+		if (argc == 2) {
+			if (!strcmp (argv [1], "-h") || !strcmp (argv [1], "--help")){
+				LOG ("Usage: ./Bin/simulate <config file> (default: Assets/Config/ChimeraConfig.xml)");
+				exit (EXIT_SUCCESS);
+			}
 		}
 
 		// READ INPUT FILE AND INITIALIZE
@@ -36,7 +38,7 @@ int main (int argc, const char** argv)
 				input = argv [1];
 			}
 			LOG ("Reading " << input << "...");
-			if (!Driver::Instance ().Initialize (argv [1])){
+			if (!Driver::Instance ().Initialize (input)){
 				LOG_ERROR ("Fatal error: Application failed to start. Aborting..");
 
 				Driver::Instance() .Quit ();

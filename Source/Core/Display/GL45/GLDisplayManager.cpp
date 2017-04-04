@@ -25,7 +25,8 @@ namespace Sim {
 
 	// default constructor
 	GLDisplayManager::GLDisplayManager ()
-	: _top (0), _left (0), _width (256), _height (256), _colorDepth (16), _display (nullptr), _context (0)
+	: _top (0), _left (0), _width (256), _height (256), _colorDepth (16),
+		_display (nullptr), _context (0), _contextAttributes (nullptr)
 	{
 		LOG ("OpenGL display manager constructed");
 	}
@@ -72,6 +73,7 @@ namespace Sim {
 			Cleanup ();
 			return false;
 		}
+		glFinish ();
 		LOG ("OpenGL 4.5 display manager initialized");
 		return true;
 	}
@@ -320,10 +322,23 @@ namespace Sim {
 			LOG_ERROR ("Could not create GLX context");
 		  return false;
 		}
+
+		XSync (_display, False);
+
 	  if (glXIsDirect (_display, _context) == True){
 	  	LOG ("Direct GL rendering context available");
 	  } else {
 	  	LOG ("Indirect GL rendering context available");
+	  }
+
+	  MakeContextCurrent ();
+	  if (gl3wInit ()){
+	  	LOG_ERROR ("GL3W and OpenGL could not be initialized");
+	  	return false;
+	  }
+	  if (!gl3wIsSupported(4, 5)){
+	  	LOG_ERROR ("OpenGL 4.5 not supported");
+	  	return false;
 	  }
 
 		return true;

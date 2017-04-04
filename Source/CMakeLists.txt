@@ -70,17 +70,15 @@ else ()
 	set (SIM_MAX_EVENT_QUEUE_SIZE ${MAX_EVENT_QUEUE_SIZE})
 endif ()
 
-if (NOT MAX_GPU_DIRECTIONAL_LIGHTS)
-	set (SIM_MAX_GPU_DIRECTIONAL_LIGHTS 2)
-else ()
-	set (SIM_MAX_GPU_DIRECTIONAL_LIGHTS ${MAX_GPU_DIRECTIONAL_LIGHTS})
-endif ()
-
 ################# Find Platform-independent libraries #################
 
 find_library (XML_LIB tinyxml2 PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
 message (STATUS "")
-message (STATUS "Found XML library: " ${XML_LIB})
+message (STATUS "XML library: " ${XML_LIB})
+
+find_library (PNG_LIB lodepng PATHS ${CMAKE_SOURCE_DIR}/Lib NO_DEFAULT_PATH)
+message (STATUS "")
+message (STATUS "PNG library: " ${PNG_LIB})
 
 ################## Add Platform Specific Cmake files ##################
 

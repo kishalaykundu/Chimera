@@ -14,6 +14,7 @@
 #include "Config.h"
 #include "CUDA/CUDAUtils.h"
 
+#include "MeshLoader.h"
 #include "Assets/Asset.h"
 #include "CuglMsdPhysics.h"
 #include "CuglMsdRender.h"
@@ -38,7 +39,7 @@ namespace Sim {
 		{
 			CuglMsdRender* c = asset->GetComponent <CuglMsdRender> ("Render").get ();
 
-			LOG_CUDA_RESULT (cuGraphicsGLRegisterBuffer (_vertices, c->_bufferObjects [0], CU_GRAPHICS_REGISTER_FLAGS_NONE));
+			LOG_CUDA_RESULT (cuGraphicsGLRegisterBuffer (_vertices, c->_positionBuffer, CU_GRAPHICS_REGISTER_FLAGS_NONE));
 
 			// load spring indices from file
 

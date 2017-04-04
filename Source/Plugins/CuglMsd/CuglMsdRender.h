@@ -27,13 +27,14 @@ namespace Sim {
 
 		protected:
 			GLuint _vertexArray;
+
+			GLuint _positionBuffer; // vertex positions (3*number of vertices)
 			/**
 			 * Buffer objects specifications:
-			 * 1. Vertex Positions (3*number of vertices)
-			 * 2. Normal texture coordinates
-			 * 3. Color texture coordinates
+			 * 1. Normal texture coordinates
+			 * 2. Color texture coordinates
 			 */
-			GLuint _bufferObjects [3];
+			GLuint _texCoordBuffers [2];
 			GLuint _colorTexture;
 			GLuint _indexBuffer;
 
@@ -59,6 +60,7 @@ namespace Sim {
 
 		protected:
 			bool LoadPrograms (tinyxml2::XMLElement&);
+			bool InitializeVBOs (tinyxml2::XMLElement&, Asset*);
 		};
 	}
 }

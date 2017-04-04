@@ -31,7 +31,7 @@ namespace Sim {
 		SharedLib& operator = (const SharedLib& p) {_handle = p._handle; return *this;}
 
 	public:
-		SharedLib (): _handle (nullptr) {LOG ("Empty shared lib constructed");}
+		SharedLib (): _handle (nullptr) {}
 		~SharedLib () {LOG ("Shared lib destroyed");}
 
 		// function to dynamically load library

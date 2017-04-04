@@ -1,6 +1,6 @@
 <ChimeraConfig>
-
-	<DisplaySystem Type="OpenGL" Config="Assets/Config/GLConfig.xml"/>
+	<EventManager />
+	<DisplayManager Type="OpenGL" Config="Assets/Config/GLConfig.xml"/>
 	<TaskManager Scheduler="IntelTBB" Config="Assets/Config/TBBConfig.xml"/>
 	<HPCManager Type="CUDA" Config="Assets/Config/CUDAConfig.xml"/>
 	<PluginManager Config="Assets/Config/PluginsConfig.xml"/>

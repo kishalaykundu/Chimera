@@ -16,6 +16,8 @@
 #include "Vector.h"
 #include "Mesh.h"
 
+using std::shared_ptr;
+
 namespace Sim {
 
 	Mesh::Mesh ()
@@ -29,13 +31,15 @@ namespace Sim {
 
 	bool Mesh::Initialize (const char* vf, const char* ff)
 	{
-		if (!MeshLoader::LoadVertices (vf, _numVertices, _current)){
+		_numVertices = MeshLoader::GetElementCount (vf);
+		_current = shared_ptr <Vector> (new Vector [_numVertices], DeleteArray <Vector> ());
+		if (!MeshLoader::LoadVertices <SIM_VECTOR_SIZE> (vf, _current. get())){
 			Cleanup ();
 			return false;
 		}
-		_numFaces = MeshLoader::GetIndexCount (ff);
+		_numFaces = MeshLoader::GetElementCount (ff);
 		_faces = shared_ptr <unsigned int> (new unsigned int [3*_numFaces], DeleteArray <unsigned int> ());
-		if (!MeshLoader::LoadIndices (ff, 3, _faces.get ())){
+		if (!MeshLoader::LoadIndices <3> (ff, _faces.get ())){
 			Cleanup ();
 			return false;
 		}

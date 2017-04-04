@@ -6,6 +6,7 @@ include_directories (
 	${GPU_INCLUDE_PATH}
 	${COMPUTE_INCLUDE_PATH}
 	${SIM_SOURCE_DIR}/Packages/TinyXML
+	${SIM_SOURCE_DIR}/Packages/LodePNG
 	${SIM_SOURCE_DIR}/Packages/FastCallback
 	./
 	${SIM_SOURCE_DIR}/Common/
@@ -13,11 +14,12 @@ include_directories (
 	${SIM_SOURCE_DIR}/Drivers/)
 
 # Set essential library links
-set (CUGLMSD_REQUIRED_LIBS ${CUGLMSD_REQUIRED_LIBS} ${MATH_LIB} ${XML_LIB} ${OPENGL_LIBS} ${CUDA_LIBS})
+set (CUGLMSD_REQUIRED_LIBS ${CUGLMSD_REQUIRED_LIBS} ${MATH_LIB} ${XML_LIB} ${PNG_LIB} ${OPENGL_LIBS} ${CUDA_LIBS})
 
 # Add source files from other folders
 set (CUGLMSD_SRCS ${CUGLMSD_SRCS}
 	${SIM_SOURCE_DIR}/Common/GL/GLUtils.cpp
+	${SIM_SOURCE_DIR}/Common/PNGUtils.cpp
 	${SIM_SOURCE_DIR}/Common/Vector.cpp
 	${SIM_SOURCE_DIR}/Common/InputParser.cpp)
 

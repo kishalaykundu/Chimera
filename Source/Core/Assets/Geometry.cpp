@@ -17,6 +17,7 @@
 
 #include "InputParser.h"
 #include "MeshLoader.h"
+#include "Vector.h"
 #include "Assets/Geometry.h"
 
 using std::string;
@@ -25,6 +26,8 @@ using std::make_shared;
 using tinyxml2::XMLDocument;
 using tinyxml2::XMLElement;
 using tinyxml2::XMLError;
+
+using Sim::Vector;
 
 namespace Sim {
 	namespace Assets {
@@ -103,23 +106,41 @@ namespace Sim {
 
 		bool Geometry::ReadVertexFile (const char* file)
 		{
-			if (!MeshLoader::LoadVertices (file, _numVertices, _vertices)){
-				LOG_ERROR ("Could not read vertex file " << file);
+			_numVertices = MeshLoader::GetElementCount (file);
+			_vertices = std::shared_ptr <Vector> (new Vector [3*_numVertices], DeleteArray <Vector> ());
+			if (!_vertices){
+				LOG_ERROR ("Could not allocate 1st vertex array of size " << _numVertices << " from " << file);
 				return false;
 			}
 
+			if (!MeshLoader::LoadVertices <SIM_VECTOR_SIZE> (file, _vertices.get ())){
+				LOG_ERROR ("Could not read vertex file " << file);
+				return false;
+			}
+			// populate 2nd buffer
+			unsigned int offset = _numVertices;
+			Vector* vptr = _vertices.get ();
+			for (unsigned int i = 0; i < _numVertices; ++i){
+				vptr [offset + i] = vptr [i];
+			}
+			// populate 3rd buffer
+			offset *= 2;
+			for (unsigned int i = 0; i < _numVertices; ++i){
+				vptr [offset + i] = vptr [i];
+			}
+
 			// update axis-aligned bounding box
-			Vector min (_vertices.get () [0]);
+			Vector min (vptr [0]);
 			Vector max (min);
 			for (unsigned int i = 1; i < _numVertices; ++i){
 				for (unsigned int j = 0; j < 3; ++j){
-					if (min [j] > _vertices.get () [i][j]){
-						min [j] = _vertices.get () [i][j];
+					if (min [j] > vptr [i][j]){
+						min [j] = vptr [i][j];
 					}
 				}
 				for (unsigned int j = 0; j < 3; ++j){
-					if (max [j] < _vertices.get () [i][j]){
-						max [j] = _vertices.get () [i][j];
+					if (max [j] < vptr [i][j]){
+						max [j] = vptr [i][j];
 					}
 				}
 			}
@@ -139,7 +160,7 @@ namespace Sim {
 				file += ".tri";
 
 				SpatialSubset* s = &(_subsets.get () [i]);
-				s->_isize = MeshLoader::GetIndexCount (file.c_str ());
+				s->_isize = MeshLoader::GetElementCount (file.c_str ());
 				s->_ioffset = 3*_numFaces;
 				_numFaces += s->_isize;
 			}
@@ -155,7 +176,7 @@ namespace Sim {
 
 				SpatialSubset* s = &(_subsets.get () [i]);
 				unsigned int* f = &(_faces.get () [s->_ioffset]);
-				if (!MeshLoader::LoadIndices (file.c_str (), 3, f)){
+				if (!MeshLoader::LoadIndices <3> (file.c_str (), f)){
 					LOG_ERROR ("Could not load index file " <<  file);
 					return false;
 				}

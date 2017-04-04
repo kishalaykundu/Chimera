@@ -33,12 +33,30 @@ namespace Sim {
 	{
 		auto const pos1 = fullname.find_last_of ('/');
 		auto const pos2 = fullname.find_last_of ('.') - 1;
-		result = fullname.substr (pos1 + 1, pos2 - pos1);
+
+		// get the name of the library without location or suffix
+		string substr = fullname.substr (pos1 + 1, pos2 - pos1);
+
+		// for non-windows platform take out the 'lib' prefix
+#		ifndef _WIN32
+		auto const pos3 = substr.find ("lib") + 3;
+#		else
+		auto const pos3 = pos1;
+#		endif
+
+		// take out trailing debug for non-release libraries
+#		ifndef NDEBUG
+		auto const pos4 = substr.find ("-debug");
+#		else
+		auto const pos4 = pos2;
+#		endif
+
+		result = substr.substr (pos3, pos4 - pos3);
 	}
 
 	LibManager::LibManager ()
 	{
-		LOG ("Plugin library manager constructed");
+		LOG ("Library manager constructed");
 	}
 
 	LibManager::~LibManager ()

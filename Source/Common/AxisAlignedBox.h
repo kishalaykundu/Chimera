@@ -69,7 +69,12 @@ namespace Sim {
 		// corner accessor
 		inline Vector operator [] (const int i) const
 		{
-			assert (i >= 0 && i < 8);
+#			ifndef NDEBUG
+			if (i < 0 || i > 8){
+				LOG_ERROR ("Invalid index for axis aligned box");
+				return Vector (_v [1]);
+			}
+#			endif
 			switch (i){
 				case 0:
 					return Vector (_v [0]);

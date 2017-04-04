@@ -51,7 +51,6 @@ if (WIN32)
 	
 	message (STATUS "")
 	message (STATUS "\t-DMAX_EVENT_QUEUE_SIZE=<queueSize> (default:32)")
-	message (STATUS "\t-DMAX_GPU_DIRECTIONAL_LIGHTS=<numLights> (default: 2)")
 	
 	message (STATUS "")
 endif ()

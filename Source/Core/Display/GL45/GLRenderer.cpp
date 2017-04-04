@@ -88,7 +88,6 @@ namespace Sim {
 		}
 
 		EnableGLAttribs ();
-		CheckGLVersion ();
 		return true;
 	}
 
@@ -144,23 +143,6 @@ namespace Sim {
 		}
 		LOG_ERROR ("No program with id " << id << " found");
 		return false;
-	}
-
-	void GLRenderer::CheckGLVersion ()
-	{
-		const GLubyte *version = glGetString (GL_VERSION);
-		LOG ("GL version: " << version);
-
-		char vch [4];
-		vch [0] = static_cast <char> (version [0]);
-		vch [1] = static_cast <char> (version [2]);
-		vch [2] = '0';
-		vch [3] ='\0';
-
-		int versionNum = atoi (vch);
-		if (versionNum < 330){
-      LOG_WARNING ("Current GL version too old to support Chimera");
-		}
 	}
 
 	void GLRenderer::SetWindowBackground (XMLElement& elem)
@@ -309,12 +291,7 @@ namespace Sim {
 
 	void GLRenderer::EnableGLAttribs ()
 	{
-		glEnable (GL_ALPHA_TEST);
-		glEnable (GL_AUTO_NORMAL);
-
 		glEnable (GL_BLEND);
-		glShadeModel (GL_SMOOTH);
-		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 		glEnable (GL_CULL_FACE);
 		glCullFace (GL_BACK);
@@ -322,12 +299,13 @@ namespace Sim {
 		glEnable (GL_DEPTH_TEST);
 		glDepthFunc (GL_LESS);
 
-		glEnable (GL_LIGHTING);
-		glEnable (GL_RESCALE_NORMAL);
-
-		glEnable (GL_POINT_SMOOTH);
 		glEnable (GL_LINE_SMOOTH);
 		glEnable (GL_POLYGON_SMOOTH);
+
+#		ifndef NDEBUG
+		glEnable (GL_DEBUG_OUTPUT);
+		glEnable (GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#		endif
 	}
 
 	void GLRenderer::Mouse (unsigned int b, int x, int y)

@@ -27,6 +27,11 @@ namespace Sim {
 
 	bool Driver::Initialize (const char* configfile)
 	{
+		if (configfile == nullptr){
+			LOG_ERROR ("No input configuration file specified");
+			return false;
+		}
+
 		// read configuration file
 		InputParser parser;
 		if (!parser.Initialize (configfile, "ChimeraConfig")){
@@ -96,6 +101,8 @@ namespace Sim {
 			return false;
 		}
 		element = nullptr;
+
+		exit (0);
 
 		// Intialize asset factory and load all assets
 		element = parser.GetElement ("AssetFactory");

@@ -16,6 +16,9 @@
 #	include "GL/GLUtils.h"
 #endif
 
+// macro-definition to enable separate default streams per thread
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
+
 extern "C"{
 #	include <cuda.h>
 #	include <cuda_runtime_api.h>

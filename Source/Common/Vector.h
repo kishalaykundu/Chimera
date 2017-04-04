@@ -9,7 +9,6 @@
  */
 #pragma once
 
-#include <cassert>
 #include <cstring>
 #include <cmath>
 
@@ -60,12 +59,22 @@ namespace Sim {
 
 			inline Real& operator [] (int index)
 			{
-				assert (index < size);
+#				ifndef NDEBUG
+				if (index > size){
+					LOG_ERROR ("Illegal index accessed: " << index);
+					return _v [size - 1];
+				}
+#				endif
 				return _v [index];
 			}
 			inline Real operator [] (int index) const
 			{
-				assert (index < size);
+#				ifndef NDEBUG
+				if (index > size){
+					LOG_ERROR ("Illegal index accessed: " << index);
+					return 0.;
+				}
+#				endif
 				return _v [index];
 			}
 
@@ -217,7 +226,12 @@ namespace Sim {
 			inline void Normalize ()
 			{
 				Real len = Length ();
-				assert (len > EPSILON);
+#				ifndef NDEBUG
+				if (len < EPSILON){
+					LOG_ERROR ("Cannot normalize vector. Length close to 0 ");
+					return;
+				}
+#				endif
 				Real rec = 1. / len;
 				for (int i = 0; i < size; ++i){
 					_v [i] *= rec;
@@ -246,7 +260,12 @@ namespace Sim {
 			inline Real Angle (const SimVector& v) const
 			{
 				Real mag = static_cast <Real> (sqrt (LengthSquared () * v.LengthSquared ()));
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot find angle with vector. One or more vectors close to 0 length");
+					return 0.;
+				}
+#				endif
 				return Dot (v) / mag;
 			}
 
@@ -341,7 +360,12 @@ namespace Sim {
 			{
 				Cross (v);
 				Real mag = Length ();
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot normalize vector after cross operations. Length close to 0");
+					return;
+				}
+#				endif
 				for (int i = 0; i < 3; ++i){
 					_v [i] /= mag;
 				}
@@ -350,7 +374,12 @@ namespace Sim {
 			{
 				Cross (v, r);
 				Real mag = r.Length ();
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot normalize vector after cross operations. Length close to 0");
+					return;
+				}
+#				endif
 				r /= mag;
 			}
 			inline Vector3 NormalizedCross (const Vector3& v) const
@@ -358,7 +387,12 @@ namespace Sim {
 				Vector3 r;
 				Cross (v, r);
 				Real mag = r.Length ();
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot normalize vector after cross operations. Length close to 0");
+					return Vector3::ZERO;
+				}
+#				endif
 				r /= mag;
 				return r;
 			}
@@ -413,7 +447,12 @@ namespace Sim {
 			{
 				Cross (v);
 				Real mag = Length ();
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot normalize vector after cross operations. Length close to 0");
+					return;
+				}
+#				endif
 				for (int i = 0; i < 3; ++i){
 					_v [i] /= mag;
 				}
@@ -422,7 +461,12 @@ namespace Sim {
 			{
 				Cross (v, r);
 				Real mag = r.Length ();
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot normalize vector after cross operations. Length close to 0");
+					return;
+				}
+#				endif
 				r /= mag;
 			}
 			inline Vector4 NormalizedCross (const Vector4& v) const
@@ -430,7 +474,12 @@ namespace Sim {
 				Vector4 r;
 				Cross (v, r);
 				Real mag = r.Length ();
-				assert (mag > EPSILON);
+#				ifndef NDEBUG
+				if (mag < EPSILON){
+					LOG_ERROR ("Cannot normalize vector after cross operations. Length close to 0");
+					return Vector4::ZERO;
+				}
+#				endif
 				r /= mag;
 				return r;
 			}

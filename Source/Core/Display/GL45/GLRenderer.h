@@ -96,7 +96,6 @@ namespace Sim {
 			bool ReloadProgram (GLuint id);
 
 		private:
-			void CheckGLVersion ();
 			void SetWindowBackground (tinyxml2::XMLElement&);
 			void SetCameraPosition (tinyxml2::XMLElement&);
 			bool SetDirectionalLights (tinyxml2::XMLElement&);

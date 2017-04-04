@@ -170,11 +170,6 @@ do
 		shift
 		;;
 		
-		--max-gpu-directional-lights=*)
-		max_gpu_directional_lights="${i#*=}"
-		shift
-		;;
-		
 		--help)
 		echo_help
 		;;
@@ -285,11 +280,6 @@ then
 	cmake_flags+=" -DMAX_EVENT_QUEUE_SIZE=$max_event_queue_size"
 fi
 
-if [ "$max_directional_lights" != "" ];
-then
-	cmake_flags+=" -DMAX_OBJECTS=$max_directional_lights"
-fi
-
 #### Optionally build Bin and Lib folders - only used for fresh installs
 
 if [ ! -d ./Bin ];
@@ -366,6 +356,23 @@ then
 	gcc -O2 -shared -fPIC -o libtinyxml2.so tinyxml2.o -lc
 	mv libtinyxml2.so ../../../Lib/
 	rm -f tinyxml2.o
+	cd ../../../
+fi
+
+##########        Check/Build LodePNG Library          #############
+
+lib=$prefix
+lib+="lodepng"
+lib+=$suffix
+
+if [ ! -f "$lib" ];
+then
+	echo "$(tput bold)$(tput setaf 1)Could not find $lib....Building$(tput sgr 0)"
+	cd Source/Packages/LodePNG/
+	gcc -O2 -c -fPIC -o lodepng.o lodepng.cpp
+	gcc -O2 -shared -fPIC -o liblodepng.so lodepng.o -lc
+	mv liblodepng.so ../../../Lib/
+	rm -f lodepng.o
 	cd ../../../
 fi
 

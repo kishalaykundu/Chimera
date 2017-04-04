@@ -61,7 +61,7 @@ namespace Sim {
 	{
 		XMLElement* result = _root->FirstChildElement (name);
 		if (result == nullptr){
-			LOG_ERROR ("Could not find " << name << " in " << _doc.Value ());
+			LOG_ERROR ("Could not find " << name << " in " << _root->Value ());
 		}
 		return result;
 	}

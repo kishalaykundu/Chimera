@@ -13,6 +13,8 @@
 			<Program Type="Render" Prefix="msd" Location="/home/kishalay/Projects/Chimera/Assets/Shaders/"/>
 		</Programs>
 		
+		<NormalTexture Location="/home/kishalay/Projects/Chimera/Assets/Data/Kidney/Mesh/Low/kidney.texn"/>
+		
 		<ColorTexture Width="1024" Height="512">
 			<Location>/home/kishalay/Projects/Chimera/Assets/Data/Kidney/Texture/kidney.2d.rgba</Location>
 			<TextureCoordinates>/home/kishalay/Projects/Chimera/Assets/Data/Kidney/Mesh/Low/kidney.texc</TextureCoordinates>
@@ -23,6 +25,8 @@
 	</Render>
 	
 	<Physics>
+	
+		<Edges Location="Location="/home/kishalay/Projects/Chimera/Assets/Data/Kidney/Mesh/Low/msd/kidney.edge"/>
 	
 		<Programs Count="1">
 			<Program Location="/home/kishalay/Projects/Chimera/Bin/CudaMSD_msd.cu.ptx">

@@ -9,7 +9,6 @@
  */
 #pragma once
 
-#include <cassert>
 #include <cstring>
 #include <cmath>
 
@@ -63,22 +62,42 @@ namespace Sim {
 			// access operators (mutative and non-mutative)
 			inline Real& operator [] (int index)
 			{
-				assert (index < row*col);
+#				ifndef NDEBUG
+				if (index >= row*col){
+					LOG_ERROR ("Illegal matrix index accessed" << index);
+					return _m [row*col - 1];
+				}
+#				endif
 				return _m [index];
 			}
 			inline Real operator [] (int index) const
 			{
-				assert (index < row*col);
+#				ifndef NDEBUG
+				if (index >= row*col){
+					LOG_ERROR ("Illegal matrix index accessed" << index);
+					return 0.;
+				}
+#				endif
 				return _m [index];
 			}
 			inline Real& operator () (int x, int y)
 			{
-				assert (x < row && y < col);
+#				ifndef NDEBUG
+				if (x >= row || y >= col){
+					LOG_ERROR ("Illegal matrix index accessed [" << x << ", " << y << "]");
+					return _m [row*col - 1];
+				}
+#				endif
 				return _m [x*row + y];
 			}
 			inline Real operator () (int x, int y) const
 			{
-				assert (x < row && y < col);
+#				ifndef NDEBUG
+				if (x >= row || y >= col){
+					LOG_ERROR ("Illegal matrix index accessed [" << x << ", " << y << "]");
+					return 0.;
+				}
+#				endif
 				return _m [x*row + y];
 			}
 
@@ -99,16 +118,6 @@ namespace Sim {
 				}
 				return result;
 			}
-			inline Vector operator * (const Vector& v) const
-			{
-				Vector result;
-				for (int i = 0; i < row; ++i){
-					for (int j = 0; j < col; ++j){
-						result._v [i] += v._v [j] *_m [row*i + j];
-					}
-				}
-				return result;
-			}
 			inline Matrix operator * (Real val) const
 			{
 				Matrix result;
@@ -119,7 +128,13 @@ namespace Sim {
 			}
 			inline Matrix operator / (Real val) const
 			{
-				assert (ABS (val) > EPSILON);
+#				ifndef NDEBUG
+				if (Absolute (val) < EPSILON){
+					LOG_ERROR ("Invalid argument for matrix scalar division");
+					Matrix m;
+					return m;
+				}
+#				endif
 				Real reciprocal = 1./val;
 				Matrix result;
 				for (int i = 0; i < row*col; ++i){
@@ -166,7 +181,12 @@ namespace Sim {
 			}
 			inline Matrix& operator /= (Real val)
 			{
-				assert (ABS (val) > EPSILON);
+#				ifndef NDEBUG
+				if (Absolute (val) < EPSILON){
+					LOG_ERROR ("Invalid argument for matrix scalar division");
+					return *this;
+				}
+#				endif
 				Real reciprocal = 1./ val;
 				for (int i = 0; i < row*col; ++i){
 					_m [i] *=  reciprocal;
@@ -174,10 +194,15 @@ namespace Sim {
 				return *this;
 			}
 
-			// transpose operator (only works for square matrix)
+			// self-transpose operator (only works for square matrix)
 			inline void Transpose ()
 			{
-				assert (row == col);
+#				ifndef NDEBUG
+				if (row != col){
+					LOG_ERROR ("Self transpose not defined for non-square matrix");
+					return;
+				}
+#				endif
 				for (int i = 0; i < row; ++i){
 					for (int j = i + 1; j < col; ++j){
 						Real tmp = _m [row*i + j];
@@ -248,6 +273,20 @@ namespace Sim {
 				return *this;
 			}
 
+			// vector multiplication
+			inline Vector3 operator * (Vector3 &v)
+			{
+				return Vector3 (v [0]*_m [0] + v [1]*_m [1] + v [2]*_m [2],
+						v [0]*_m [3] + v [1]*_m [4] + v [2]*_m [5],
+						v [0]*_m [6] + v [1]*_m [7] + v [2]*_m [8]);
+			}
+			inline Vector4 operator * (Vector4 &v)
+			{
+				return Vector4 (v [0]*_m [0] + v [1]*_m [1] + v [2]*_m [2],
+						v [0]*_m [3] + v [1]*_m [4] + v [2]*_m [5],
+						v [0]*_m [6] + v [1]*_m [7] + v [2]*_m [8], 1.);
+			}
+
 			// determinant calculator
 			inline Real Determinant () const
 			{
@@ -271,7 +310,12 @@ namespace Sim {
 				tmp [8] = _m [0] * _m [4] - _m [1] * _m [3];
 
 				Real det = Determinant ();
-				assert (ABS (det) > EPSILON);
+#				ifndef NDEBUG
+				if (Absolute (det) < EPSILON){
+					LOG_ERROR ("Degenerate matrix: determinant 0");
+					return;
+				}
+#				endif
 				det = 1./ det;
 				for (int i = 0; i < 9; ++i){
 					_m [i] = det * tmp [i];
@@ -287,9 +331,15 @@ namespace Sim {
 			inline Matrix4x4 (const Matrix3x3& m)
 			: Matrix <4,4> ()
 			{
-				memcpy (_m, m._m, 3*sizeof (Real));
-				memcpy (&(_m [4]), &(m._m [3]), 3*sizeof (Real));
-				memcpy (&(_m [7]), &(m._m [6]), 3*sizeof (Real));
+				for (unsigned int i = 0; i < 3; ++i){
+					_m [i] = m [i];
+				}
+				for (unsigned int i = 0; i < 3; ++i){
+					_m [i + 4] = m [i + 3];
+				}
+				for (unsigned int i = 0; i < 3; ++i){
+					_m [i + 8] = m [i + 6];
+				}
 			}
 			inline Matrix4x4 (const Real* m): Matrix <4, 4> (m) {}
 			inline Matrix4x4 (const Real m): Matrix <4, 4> (m) {_m [15] = 1.;}
@@ -358,6 +408,22 @@ namespace Sim {
 				return *this;
 			}
 
+			// vector multiplication
+			inline Vector4 operator * (Vector4 &v)
+			{
+				Real w = v [0]*_m [12] + v [1]*_m [13] + v [2]*_m [14] + v [3]*_m [15];
+#				ifndef NDEBUG
+				if (Absolute (w) < EPSILON){
+					LOG_ERROR ("Malformed matrix-vector multiplication");
+					return Vector4::ZERO;
+				}
+#				endif
+				w = 1./w;
+				return Vector4((v [0]*_m [0] + v [1]*_m [1] + v [2]*_m [2] + v [3]*_m [3]) * w,
+						(v [0]*_m [4] + v [1]*_m [5] + v [2]*_m [6] + v [3]*_m [7]) * w,
+						(v [0]*_m [8] + v [1]*_m [9] + v [2]*_m [10] + v [3]*_m [11]) * w, 1.);
+			}
+
 			// determinant
 			inline Real Determinant () const
 			{
@@ -408,7 +474,12 @@ namespace Sim {
 						_m [0] * _m [6] * _m [9] - _m [1] * _m [4] * _m [10] + _m [0] * _m [5] * _m [10];
 
 				Real det = Determinant ();
-				assert (ABS (det) > EPSILON);
+#				ifndef NDEBUG
+				if (Absolute (det) < EPSILON){
+					LOG_ERROR ("Malformed matrix - determinant close to 0. Inverse could not be completed");
+					return;
+				}
+#				endif
 				det = 1./ det;
 				for (int i = 0; i < 16; ++i){
 					_m [i] = det * tmp [i];

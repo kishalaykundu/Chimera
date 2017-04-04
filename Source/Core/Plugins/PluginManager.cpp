@@ -137,13 +137,7 @@ namespace Sim {
 
 	bool PluginManager::InitializeIdMap (XMLElement& elem)
 	{
-		XMLElement* melem = elem.FirstChildElement ("PluginIdMap");
-		if (melem == nullptr){
-			LOG_ERROR ("No plugin Id mapper specified in config");
-			return false;
-		}
-
-		XMLElement* mlist = melem->FirstChildElement ("Map");
+		XMLElement* mlist = elem.FirstChildElement ("Map");
 		if (mlist == nullptr){
 			LOG_ERROR ("No plugin Id maps specified in config");
 			return false;
@@ -156,6 +150,7 @@ namespace Sim {
 				LOG_ERROR ("No \'Name\' attribute found in plugin Id map");
 				return false;
 			}
+
 			auto f = _nameMap.find (name);
 			if (f != _nameMap.end ()){
 				LOG_ERROR ("Duplicate entry for " << name << " in plugin Id map (forbidden)");

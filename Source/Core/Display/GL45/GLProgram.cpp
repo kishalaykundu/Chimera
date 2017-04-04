@@ -85,7 +85,7 @@ namespace Sim {
     	LOG_ERROR (shader << " does not exist");
     	return false;
     }
-    if (!LoadShader (GL_VERTEX_SHADER_ARB, shader, id)){
+    if (!LoadShader (GL_VERTEX_SHADER, shader, id)){
     	LOG_ERROR (shader.c_str () << " could not be initialized");
       return false;
     }
@@ -98,7 +98,7 @@ namespace Sim {
     // load geometry shader (optional)
     shader = string(_location + ".gs");
     if (fileExists (shader)){
-  		if ( !LoadShader (GL_GEOMETRY_SHADER_ARB, shader, id)){
+  		if ( !LoadShader (GL_GEOMETRY_SHADER, shader, id)){
   			LOG_ERROR (shader.c_str () << " could not be initialized");
         return false;
   		}

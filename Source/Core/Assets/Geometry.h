@@ -86,7 +86,8 @@ namespace Sim {
 				Vector* PreviousVertexBuffer () {return &(_vertices.get () [(_offsetIndex - 1)*_numVertices]);}
 				Vector* CurrentVertexBuffer () {return &(_vertices.get () [_offsetIndex*_numVertices]);}
 
-				unsigned int FaceIndexSubsetCount () const {return _numSubsets;}
+				unsigned int FaceIndexCount () const {return _numFaces;}
+				unsigned int* FaceIndexBuffer () {return _faces.get ();}
 				unsigned int* FaceIndexBuffer (unsigned int index)
 				{
 #					ifndef NDEBUG

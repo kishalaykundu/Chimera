@@ -25,10 +25,11 @@ extern "C" {
 #	include <OpenGL/glx.h>
 #	include <OpenGL/glxext.h>
 #else
+#	include <GL/gl3w.h>
+#	include <GL/gl.h>
 #	include <GL/glx.h>
 #	include <GL/glxext.h>
-#	include <GL/gl.h>
-#	include <GL/glext.h>
+//#	include <GL/glext.h>
 #endif
 
 }
