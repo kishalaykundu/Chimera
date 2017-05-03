@@ -10,11 +10,31 @@
 #include <vector>
 
 #include "Preprocess.h"
+#include "Log.h"
 #include "PNGUtils.h"
 
 using std::vector;
 
 namespace Sim {
+
+	bool PNGDecoder::operator () (unsigned char* data)
+	{
+		// purge any existing data
+		SAFE_DELETE (data);
+
+		vector <unsigned char> image; //the raw pixels
+
+		// decode
+		auto error = lodepng::decode(image, _width, _height, _file);
+		if (error){
+			LOG_ERROR ("Could not load " << _file << ". Error no. " << error << ": " << lodepng_error_text (error));
+			data = nullptr;
+			return false;
+		}
+		data = image.data ();
+
+		return true;
+	}
 
 	bool DecodePNG (const char* file, unsigned int width, unsigned int height, unsigned char* data)
 	{

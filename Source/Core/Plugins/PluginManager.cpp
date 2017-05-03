@@ -28,24 +28,20 @@ using tinyxml2::XML_SUCCESS;
 
 namespace Sim {
 
-	std::map <std::string, unsigned int> PluginManager::_nameMap;
+	std::map <std::string, unsigned int> PluginFactory::_nameMap;
 
-	PluginManager::PluginManager ()
+	PluginFactory::PluginManager ()
 	{
 		LOG ("Plugin manager constructed");
 	}
 
-	PluginManager::~PluginManager ()
+	PluginFactory::~PluginManager ()
 	{
 		Cleanup ();
 		LOG ("Plugin manager destroyed");
 	}
 
-	PluginManager::PluginManager (const PluginManager& pm) {}
-
-	PluginManager& PluginManager::operator = (const PluginManager& pm) {return *this;}
-
-	bool PluginManager::Initialize (const char* configfile)
+	bool PluginFactory::Initialize (const char* configfile)
 	{
 		InputParser parser;
 		if (!parser.Initialize (configfile, "PluginsConfig")){
@@ -88,19 +84,19 @@ namespace Sim {
 		return true;
 	}
 
-	void PluginManager::Cleanup ()
+	void PluginFactory::Cleanup ()
 	{
 		_plugins.clear ();
 		_libManager.reset ();
 		_nameMap.clear ();
 	}
 
-	void PluginManager::AddPlugin (unsigned int id, shared_ptr <Plugin> p)
+	void PluginFactory::AddPlugin (unsigned int id, shared_ptr <Plugin> p)
 	{
 		_plugins [id] = p;
 	}
 
-	shared_ptr <Plugin> PluginManager::GetPlugin (unsigned int id)
+	shared_ptr <Plugin> PluginFactory::GetPlugin (unsigned int id)
 	{
 #		ifndef NDEBUG
 		auto p = _plugins.find (id);
@@ -116,7 +112,7 @@ namespace Sim {
 #		endif
 	}
 
-	shared_ptr <Plugin> PluginManager::GetPlugin (const char* name)
+	shared_ptr <Plugin> PluginFactory::GetPlugin (const char* name)
 	{
 #		ifndef NDEBUG
 		auto p = _nameMap.find (name);

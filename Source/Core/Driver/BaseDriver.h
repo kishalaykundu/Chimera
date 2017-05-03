@@ -23,25 +23,24 @@
 
 namespace Sim {
 
+	class PluginFactory;
 	class AssetFactory;
 	class DisplayManager;
 	class EventManager;
 	class HPCManager;
-	class PluginManager;
 	class TaskManager;
 
 	class BaseDriver {
 
 		protected:
-			bool _runFlag;
-			bool _quitFlag;
+			bool _runFlag = false;
 
 			/**
 			 * The Plugin manager. This is responsible for all the dynamically loaded
 			 * plugin libraries. This in effect serves as the logic layer manager for
 			 * the Chimera system.
 			 */
-			std::unique_ptr <PluginManager> _pluginManager;
+			std::unique_ptr <PluginFactory> _pluginFactory;
 			/**
 			 * The Asset factory that contains pointers to every persistent asset in
 			 * the Chimera system. All assets are accessed through the asset factory.
@@ -73,12 +72,12 @@ namespace Sim {
 			std::unique_ptr <TaskManager> _taskManager;
 
 		protected:
-			BaseDriver ();
-			virtual ~BaseDriver ();
+			BaseDriver () = default;
+			virtual ~BaseDriver () = default;
 
-		private: // forbidden copy ctor. and assignment operator
-			BaseDriver (const BaseDriver&);
-			BaseDriver& operator = (const BaseDriver&);
+			// forbidden copy ctor. and assignment operator
+			BaseDriver (const BaseDriver&) = delete;
+			BaseDriver& operator = (const BaseDriver&) = delete;
 
 		public:
 			virtual bool Initialize (const char* configfile) = 0;

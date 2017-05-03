@@ -29,7 +29,6 @@ extern "C" {
 #	include <GL/gl.h>
 #	include <GL/glx.h>
 #	include <GL/glxext.h>
-//#	include <GL/glext.h>
 #endif
 
 }

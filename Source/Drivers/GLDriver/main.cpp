@@ -15,7 +15,7 @@
 #include <cstring>
 
 #include "Preprocess.h"
-#include "GL-CUDA-TBB/Driver.h"
+#include "GLDriver/Driver.h"
 
 using Sim::Driver;
 

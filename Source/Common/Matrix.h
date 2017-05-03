@@ -28,10 +28,10 @@ namespace Sim {
 					_m [i] = 0.;
 				}
 			}
-			inline Matrix (const Matrix& m)
-			{
-				memcpy (_m, m._m, row*col*sizeof (Real));
-			}
+			inline ~Matrix () = default;
+			inline Matrix (const Matrix& m) = default;
+			inline Matrix& operator = (const Matrix& m) = default;
+
 			inline Matrix (const Real* m)
 			{
 				memcpy (_m, m, row*col*sizeof (Real));
@@ -43,14 +43,7 @@ namespace Sim {
 				}
 			}
 
-			inline ~Matrix () {}
-
-			// copy operators
-			inline Matrix& operator = (const Matrix& m)
-			{
-				memcpy (_m, m._m, row*col*sizeof (Real));
-				return *this;
-			}
+			// copy operator
 			inline Matrix& operator = (const Real val)
 			{
 				for (int i = 0; i <row*col; ++i){

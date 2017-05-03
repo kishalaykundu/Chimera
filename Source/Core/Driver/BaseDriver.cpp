@@ -26,31 +26,8 @@ using tinyxml2::XMLElement;
 
 namespace Sim {
 
-	// default constructor
-	BaseDriver::BaseDriver ()
-	: _runFlag (false), _quitFlag (false) {}
-
-	// destructor
-	BaseDriver::~BaseDriver () {}
-
-	// copy constructor (forbidden)
-	BaseDriver::BaseDriver (const BaseDriver& d)
-	: _runFlag (d._runFlag), _quitFlag (d._runFlag) {}
-
-	// assignment operator (forbidden)
-	BaseDriver& BaseDriver::operator = (const BaseDriver& d)
-	{
-		_runFlag = d._runFlag;
-		_quitFlag = d._quitFlag;
-		return *this;
-	}
-
 	// prepare for quitting
-	void BaseDriver::Quit ()
-	{
-		_runFlag = false;
-		_quitFlag = true;
-	}
+	void BaseDriver::Quit () {_runFlag = false;}
 
 	bool BaseDriver::InitializePluginManager (const char* config)
 	{

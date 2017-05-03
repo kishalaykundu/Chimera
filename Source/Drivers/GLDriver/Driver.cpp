@@ -13,7 +13,7 @@
 #include "tinyxml2.h"
 #include "Preprocess.h"
 #include "InputParser.h"
-#include "GL-CUDA-TBB/Driver.h"
+#include "GLDriver/Driver.h"
 #include "HPC/CUDA/CudaHPCManager.h"
 #include "Tasks/TBB/TBBTaskManager.h"
 

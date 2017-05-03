@@ -6,7 +6,7 @@
  *
  * @section DESCRIPTION
  * A simple crc32 hash code calculating program implemented in
- * C++ format.
+ * C++ format. This is a functor class.
  */
 #pragma once
 
@@ -15,9 +15,15 @@ namespace Sim {
 	class Crc32 {
 	private:
 		unsigned int _table [256];
+
 	public:
 		Crc32 ();
+		~Crc32 () = default;
 
-		unsigned int CalculateHash (const char* message);
+		// forbidden copy and assignment operator
+		Crc32 (const Crc32&) = delete;
+		Crc32& operator = (const Crc32&) = delete;
+
+		unsigned int operator () (const char* message);
 	};
 }

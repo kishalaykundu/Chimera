@@ -15,7 +15,20 @@ include_directories (
 
 # Set essential library links
 set (APP_REQUIRED_LIBS ${APP_REQUIRED_LIBS} ${DL_LIB} ${MATH_LIB}
-		${THREAD_LIB} ${XML_LIB} ${OPENGL_LIBS} ${CUDA_LIBS} ${TBB_LIBS})
+		${THREAD_LIB} ${XML_LIB} ${OPENGL_LIBS})
+
+# Add CUDA or OpenCL libraries if they are enabled
+if (COMPUTE_PACKAGE STREQUAL "CUDA")
+	set (APP_REQUIRED_LIBS ${APP_REQUIRED_LIBS} ${CUDA_LIBS})
+endif ()
+if (COMPUTE_PACKAGE STREQUAL "OpenCL")
+	set (APP_REQUIRED_LIBS ${APP_REQUIRED_LIBS} ${CL_LIB})
+endif ()
+
+# Add TBB Scheduler library if it is enabled
+if (SCHEDULER_PACKAGE STREQUAL "IntelTBB")
+	set (APP_REQUIRED_LIBS ${APP_REQUIRED_LIBS} ${TBB_LIBS})
+endif ()
 	
 # Set Core directory path
 set (SIM_CORE_DIR ${SIM_SOURCE_DIR}/Core)
@@ -50,7 +63,7 @@ set (APP_SRCS ${APP_SRCS}
 file (GLOB GL45_DIR_SRCS "${SIM_CORE_DIR}/Display/GL45/*.cpp")
 file (GLOB CUDA_DIR_SRCS "${SIM_CORE_DIR}/HPC/CUDA/*.cpp")
 file (GLOB TBB_DIR_SRCS "${SIM_CORE_DIR}/Tasks/TBB/*.cpp")
-file (GLOB DRIVER_DIR_SRCS "${SIM_SOURCE_DIR}/Drivers/GL-CUDA-TBB/*.cpp")
+file (GLOB DRIVER_DIR_SRCS "${SIM_SOURCE_DIR}/Drivers/GLDriver/*.cpp")
 
 set (APP_SRCS ${APP_SRCS} ${GL45_DIR_SRCS} ${CUDA_DIR_SRCS} ${TBB_DIR_SRCS} ${DRIVER_DIR_SRCS})
 

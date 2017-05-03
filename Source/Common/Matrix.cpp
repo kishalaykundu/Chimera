@@ -16,15 +16,18 @@ namespace Sim {
 	const Matrix3x3 Matrix3x3::ONE (1., 1., 1., 1., 1., 1., 1., 1., 1.);
 	const Matrix3x3 Matrix3x3::IDENTITY (1., 0., 0., 0., 1., 0., 0., 0., 1.);
 
-	const Matrix4x4 Matrix4x4::ZERO (0., 0., 0., 0.,
+	const Matrix4x4 Matrix4x4::ZERO (
+			0., 0., 0., 0.,
 			0., 0., 0., 0.,
 			0., 0., 0., 0.,
 			0., 0., 0., 1.);
-	const Matrix4x4 Matrix4x4::ONE (1., 1., 1., 1.,
+	const Matrix4x4 Matrix4x4::ONE (
+			1., 1., 1., 1.,
 			1., 1., 1., 1.,
 			1., 1., 1., 1.,
 			1., 1., 1., 1.);
-	const Matrix4x4 Matrix4x4::IDENTITY (1., 0., 0., 0.,
+	const Matrix4x4 Matrix4x4::IDENTITY (
+			1., 0., 0., 0.,
 			0., 1., 0., 0.,
 			0., 0., 1., 0.,
 			0., 0., 0., 1.);

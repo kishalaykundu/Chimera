@@ -62,17 +62,17 @@ namespace Sim {
 			}
 		};
 	protected:
-		unsigned int _nSurfaceVertices;
+		unsigned int _nSurfaceVertices = 0;
 		std::vector <Vector> _vertices;
 
 		std::vector <Vector3> _texCoords3D;
 		std::vector <Vector2> _texCoords2D;
 
-		unsigned int _nSubsets;
-		Subset* _subset;
+		unsigned int _nSubsets = 1;
+		Subset* _subset = nullptr;
 
 	public:
-		GLMesh ();
+		GLMesh () = default;
 		~GLMesh ();
 
 		bool Initialize (unsigned int depth, const char* location, const char* prefix);

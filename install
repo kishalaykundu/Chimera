@@ -20,8 +20,6 @@ function echo_help {
 	echo $'\t'"--scheduler-package=<SCHEDULAR-PACKAGE> [None(default)/IntelTBB/Threads]"
 	echo $'\t'"--scheduler-include-path=<INCLUDE-PATH> (specifies non-standard scheduler include path"
 	echo $'\t'"--scheduler-package-location=<LOCATION> (specifies non-standard scheduler library location)"
-	echo $'\t'"--max-event-queue-size=<MAX-QUEUE-SIZE> [default: 32 (recommended power of 2)]"
-	echo $'\t'"--max-gpu-directional-lights=<MAX-DIRECTIONAL-LIGHTS> [default: 2 (recommended power of 2)]"
 	echo ""
 	echo "Minimum System specifications (Check your system for successful compilation):";
 	echo "OpenGL"$'\t'": 4.5"
@@ -162,11 +160,6 @@ do
 		
 		--scheduler-package-location=*)
 		scheduler_pkg_loc="${i#*=}"
-		shift
-		;;
-		
-		--max-event-queue-size=*)
-		max_event_queue_size="${i#*=}"
 		shift
 		;;
 		

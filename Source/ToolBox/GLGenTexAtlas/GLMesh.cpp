@@ -32,10 +32,6 @@ using std::list;
 
 namespace Sim {
 
-	GLMesh::GLMesh ()
-	: _nSurfaceVertices (0), _nSubsets (1), _subset (nullptr)
-	{}
-
 	GLMesh::~GLMesh ()
 	{
 		delete [] _subset;
@@ -353,25 +349,6 @@ namespace Sim {
     vector <bool> borderFlag (verts.size (), false);
     for (unsigned int i = edgeOffset; i < s->_edges.size (); ++i){
 
-    }
-    for (unsigned int i = 0; i < faces.size ()/ 3; ++i){
-      for (unsigned int j = 0; j < 3; ++j){
-        if (neighbors [i]._v [j] < 0){
-          switch (j){
-            case 0:
-              borderFlag [faces [3*i]] = true;
-              borderFlag [faces [3*i + 1]] = true;
-              break;
-            case 1:
-              borderFlag [faces [3*i + 1]] = true;
-              borderFlag [faces [3*i + 2]] = true;
-              break;
-            case 2:
-              borderFlag [faces [3*i]] = true;
-              borderFlag [faces [3*i + 2]] = true;
-          }
-        }
-      }
     }
 
 	}

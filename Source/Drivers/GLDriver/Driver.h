@@ -30,15 +30,15 @@ namespace Sim {
 			static Driver* _instance;
 
 		protected:
-			Driver () {LOG ("GL-CUDA-TBB Driver constructed");}
+			Driver () {LOG ("GL Driver constructed");}
 
-		private: // forbidden copy constructor and assignment operator
-			Driver (const Driver&) : BaseDriver () {}
-			Driver& operator = (const Driver&) {return *this;}
+			// forbidden copy constructor and assignment operator
+			Driver (const Driver&) = delete;
+			Driver& operator = (const Driver&) = delete;
 
 		public:
 			static Driver& Instance () {return *_instance;}
-			~Driver () {LOG ("GL-CUDA-TBB Driver destroyed");}
+			~Driver () {LOG ("GL Driver destroyed");}
 
 			virtual bool Initialize (const char* config);
 			virtual void Run ();

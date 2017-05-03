@@ -24,20 +24,20 @@ namespace Sim {
 
 	class Plugin;
 
-	class PluginManager {
+	class PluginFactory {
 
 		protected:
 			std::unique_ptr <LibManager> _libManager;
 			static std::map <std::string, unsigned int> _nameMap;
 			std::map <unsigned int, std::shared_ptr <Plugin> > _plugins;
 
-		private: // forbidden copy constructor and assignment operator
-			PluginManager (const PluginManager&);
-			PluginManager& operator = (const PluginManager&);
+			// forbidden copy constructor and assignment operator
+			PluginFactory (const PluginManager&) = delete;
+			PluginFactory& operator = (const PluginManager&) = delete;
 
 		public:
-			PluginManager ();
-			~PluginManager ();
+			PluginFactory ();
+			~PluginFactory ();
 
 			bool Initialize (const char* config);
 			void Cleanup ();
